@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { STAGE_META, STAGE_ORDER, type StageId } from './data/content';
+import { STAGE_META, STAGE_ORDER, WORDS, type StageId } from './data/content';
 import { GameProvider, useGame } from './state/game';
 import { Starfield } from './components/Starfield';
 import { MissionControl } from './components/MissionControl';
@@ -33,6 +33,15 @@ function Mission() {
     setMuted(state.muted);
     setMute(state.muted);
   }, [state.muted]);
+
+  // Warm the ten illustrations up front: a WORD card must be readable the
+  // instant it is revealed, not a second later.
+  useEffect(() => {
+    WORDS.forEach((w) => {
+      const img = new Image();
+      img.src = `${import.meta.env.BASE_URL}art/${w.image}.webp`;
+    });
+  }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

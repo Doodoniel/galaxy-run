@@ -70,7 +70,7 @@ export function WordArt({ word, size = 200, float = true }: { word: Word; size?:
         alt={word.word}
         width={size}
         height={size}
-        loading="lazy"
+        decoding="async"
       />
     </div>
   );
