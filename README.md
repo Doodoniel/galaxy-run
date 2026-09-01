@@ -22,7 +22,12 @@ The interface is English-only by design: it is part of the lesson's golden rule.
 | **My Planet** | Planet designer, sheet, and the 15-second pitch timer | Worksheet 5 |
 | **Landing** | Race winner, MVP, per-pilot logbook, printable, homework | Worksheet 6 |
 
-Two things live outside the stage order:
+Three things live outside the stage order:
+
+- **📖 Story** (top bar, or press `S`) — the text on the wall. In the printed lesson the story is pinned up in
+  the corner of the room for the whole hour; this is that sheet, reachable at any moment, with the ten target
+  words marked and a "read it to me" button. It stays locked during Picture This — that stage only works if
+  the text is unseen — with a teacher override.
 
 - **🧠 Memory Core** (top bar, or press `M`) — the vocabulary trainer. Every word carries a mastery level
   0–5 per pilot, and the drill type gets harder as the level rises: picture → word → meaning → by ear →

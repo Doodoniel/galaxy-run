@@ -3,6 +3,7 @@ import { STAGE_META, STAGE_ORDER, WORDS, type StageId } from './data/content';
 import { GameProvider, useGame } from './state/game';
 import { Starfield } from './components/Starfield';
 import { MissionControl } from './components/MissionControl';
+import { StoryBook } from './components/StoryBook';
 import { LiftOff } from './stages/LiftOff';
 import { WordLab } from './stages/WordLab';
 import { Challenge } from './stages/Challenge';
@@ -27,6 +28,7 @@ function Mission() {
   const { state, goto } = useGame();
   const [control, setControl] = useState(false);
   const [memory, setMemory] = useState(false);
+  const [story, setStory] = useState(false);
   const [mute, setMute] = useState(isMuted());
 
   useEffect(() => {
@@ -49,6 +51,7 @@ function Mission() {
       if (typing) return;
       if (e.key.toLowerCase() === 't') setControl((c) => !c);
       if (e.key.toLowerCase() === 'm') setMemory((m) => !m);
+      if (e.key.toLowerCase() === 's') setStory((s) => !s);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -96,6 +99,17 @@ function Mission() {
         </button>
 
         <button
+          className={`btn btn--sm ${story ? '' : 'btn--ghost'}`}
+          onClick={() => {
+            sfx.tap();
+            setStory((s) => !s);
+          }}
+          title="The story text (S)"
+        >
+          📖 <span className="hide-sm">Story</span>
+        </button>
+
+        <button
           className="icon-btn"
           data-on={!mute}
           onClick={() => {
@@ -133,6 +147,7 @@ function Mission() {
         )}
       </main>
 
+      <StoryBook open={story} onClose={() => setStory(false)} />
       <MissionControl open={control} onClose={() => setControl(false)} />
     </>
   );
