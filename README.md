@@ -24,7 +24,7 @@ ahead, and clicking one jumps there.
 | # | Phase | What happens | Min |
 | --- | --- | --- | --- |
 | 1 | **Lead-in** · Mission Briefing | Callsigns, rockets, mode, what today is about | 0–4 |
-| 2 | **Presentation** · Word Lab & Story | Ten words one card at a time (picture → word → stress → drill → concept check, plus an optional *Freeze!* round). Then the story: six sentences heard with **no text**, then retold from a six-picture storyboard | 4–20 |
+| 2 | **Presentation** · Word Lab & Story | Ten words one card at a time (picture → word → stress → drill → concept check, plus an optional *Freeze!* round). Then the story as a **shared reading**: six spreads, picture and sentence side by side, the teacher reads and the crew reads back — then the text goes away and they retell it from the six pictures alone | 4–20 |
 | 3 | **Controlled practice** · Check & Drill | Vocabulary (meaning → word, then the word back into a sentence), Story check (true/false, then the meteor storm of one-mistake sentences), Speed round (60 seconds, ten words, per pilot) | 20–36 |
 | 4 | **Production** · Now Speak | Galaxy Run — the 20-tile board race: WORD · METEOR · MIRA · STAR · BOOST · WORMHOLE. Then My Planet: design one, pitch it in fifteen seconds | 36–58 |
 | 5 | **Feedback** · Landing | Race winner, MVP, crew record, per-pilot report, homework, printable | 58–60 |
@@ -66,9 +66,11 @@ speech recognition.
 
 ## Speech and saving
 
-Pronunciation and the story audio use the browser's built-in English voice (Web Speech API); Chrome and Edge
-sound best. If a device has no English voice everything still works — the teacher reads aloud, as in the
-printed plan.
+Speech is used for **single words and single sentences only** — a browser voice reading five paragraphs
+sounds worse than any teacher, so there is no whole-story playback anywhere. Words have a 🔈 on the
+flashcards and in Memory Core; each story spread has a 🔈 for that one sentence, mainly for a pilot working
+alone at home. In class the teacher reads. Chrome and Edge sound best; with no English voice installed
+everything still works.
 
 Progress lives in `localStorage` on the device running the game and survives a reload. *Reset the whole
 mission* in Mission Control clears it. Nothing leaves the browser; there is no server.

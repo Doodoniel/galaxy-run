@@ -239,7 +239,7 @@ function FreezeRound({ onDone }: { onDone: () => void }) {
       <div className="center">
         {phase === 'idle' && (
           <div className="center pop">
-            <WordArt word={word} size="min(220px, 26vh)" />
+            <WordArt word={word} size="min(220px, 24vh)" />
             <div className="q">{word.word}</div>
             <button
               className="btn btn--lg"

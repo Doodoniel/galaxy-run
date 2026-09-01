@@ -6,49 +6,46 @@ import { Dots, PilotChip, Star, StarBurst, WordArt, tap } from '../components/ui
 import { sfx, speak, stopSpeaking } from '../lib/audio';
 
 /**
- * The story, in the shape the printed lesson uses: listen with no text at
- * all, one sentence at a time, then retell it from pictures.
+ * The story, as a shared reading.
  *
- * On paper the pilots draw those pictures themselves. On a shared screen that
- * does not work — nobody but the host can draw — so the six flashcard
- * illustrations become the storyboard instead. The listening stays blind,
- * which is the part that actually carries the learning.
+ * The printed lesson has the teacher read it aloud one sentence at a time
+ * while the pilots draw. Neither half survives a shared screen — nobody but
+ * the host can draw, and a browser voice reading five paragraphs sounds worse
+ * than any teacher. So this is a big picture book instead: one spread per
+ * sentence, picture on the left, sentence on the right, the teacher reading
+ * and the crew repeating. Then the text goes away and they retell it from the
+ * six pictures alone, which is where the learning actually happens.
+ *
+ * The small 🔈 on each spread speaks that one sentence — short enough for the
+ * browser voice to handle, and there for a pilot working alone at home.
  */
 export function StoryTime() {
-  const [step, setStep] = useState<'listen' | 'retell'>('listen');
-  return step === 'listen' ? <Listen onDone={() => setStep('retell')} /> : <Retell onBack={() => setStep('listen')} />;
+  const [step, setStep] = useState<'read' | 'retell'>('read');
+  return step === 'read' ? <Read onDone={() => setStep('retell')} /> : <Retell onBack={() => setStep('read')} />;
 }
 
-function Listen({ onDone }: { onDone: () => void }) {
+function Read({ onDone }: { onDone: () => void }) {
   const { state, update } = useGame();
   const [i, setI] = useState(0);
-  const [played, setPlayed] = useState(false);
-  const [shown, setShown] = useState(false);
 
   const last = i === STORY_SENTENCES.length - 1;
   const marks = STORY_SENTENCES.map((_, n) => (n < state.story.heard ? true : null));
-
-  const play = () => {
-    setPlayed(true);
-    speak(STORY_SENTENCES[i], { rate: 0.86 });
-  };
 
   const go = (delta: number) => {
     stopSpeaking();
     const n = i + delta;
     if (n < 0 || n >= STORY_SENTENCES.length) return;
     setI(n);
-    setPlayed(false);
-    setShown(false);
     sfx.tap();
     update((d) => void (d.story.heard = Math.max(d.story.heard, n)));
   };
 
   return (
     <Stage
-      title="Listen"
+      title="The story"
       step={`${i + 1} / ${STORY_SENTENCES.length}`}
       aside={<Dots marks={marks} at={i} />}
+      hint="“Look at the picture. Listen to me, then read it back to me — all together.”"
       footer={
         <div className="btn-row">
           {i > 0 && (
@@ -57,13 +54,12 @@ function Listen({ onDone }: { onDone: () => void }) {
             </button>
           )}
           {!last ? (
-            <button className="btn" onClick={() => go(1)} disabled={!played}>
+            <button className="btn" onClick={() => go(1)}>
               Next sentence →
             </button>
           ) : (
             <button
               className="btn"
-              disabled={!played}
               onClick={() => {
                 stopSpeaking();
                 sfx.star();
@@ -77,24 +73,57 @@ function Listen({ onDone }: { onDone: () => void }) {
         </div>
       }
     >
-      <div className="center" style={{ maxHeight: '100%' }}>
-        <div key={i} className="pop" style={{ display: 'grid', placeItems: 'center' }}>
-          <WordArt word={wordById(STORY_IMAGES[i])} size="min(260px, 32vh)" />
-        </div>
+      {/* Picture and words side by side: nothing can ever sit on top of the
+          buttons, however short the screen is. */}
+      <div
+        key={i}
+        className="pop"
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'auto minmax(300px, 620px)',
+          gap: 'calc(var(--u) * 2.4)',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: 'min(1150px, 100%)',
+          height: '100%',
+        }}
+      >
+        <WordArt word={wordById(STORY_IMAGES[i])} size="min(320px, 42vh)" />
 
-        <button className="btn btn--lg" onClick={play}>
-          {played ? '🔁 Play again' : `▶ Play sentence ${i + 1}`}
-        </button>
+        <div className="col" style={{ minWidth: 0, gap: 'calc(var(--u)*1.1)' }}>
+          <span
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 'clamp(28px, 6vh, 60px)',
+              lineHeight: 1,
+              color: 'var(--phase)',
+              opacity: 0.55,
+            }}
+          >
+            {i + 1}
+          </span>
 
-        {shown ? (
-          <p className="q q--sm pop" style={{ maxWidth: 'min(900px, 92vw)' }}>
+          <p
+            style={{
+              margin: 0,
+              fontFamily: 'var(--font-display)',
+              fontSize: 'clamp(20px, 3.6vh, 40px)',
+              lineHeight: 1.28,
+            }}
+          >
             {STORY_SENTENCES[i]}
           </p>
-        ) : (
-          <button className="btn btn--ghost btn--sm" onClick={tap(() => setShown(true))} disabled={!played}>
-            👀 Show the words
-          </button>
-        )}
+
+          <div>
+            <button
+              className="btn btn--ghost btn--sm"
+              onClick={() => speak(STORY_SENTENCES[i], { rate: 0.86 })}
+              title="Hear this one sentence"
+            >
+              🔈 Hear it
+            </button>
+          </div>
+        </div>
       </div>
     </Stage>
   );
@@ -121,13 +150,13 @@ function Retell({ onBack }: { onBack: () => void }) {
       hint="“Six pictures, no words. Tell me the story back. Anybody can start.”"
       aside={
         <button className="btn btn--ghost btn--sm" onClick={tap(onBack)}>
-          ← Listen again
+          ← Read it again
         </button>
       }
       footer={<NextButton label="To the practice" />}
     >
       <StarBurst fire={burst} />
-      <div className="center" style={{ maxHeight: '100%' }}>
+      <div className="center" style={{ width: '100%' }}>
         <div
           style={{
             display: 'grid',
@@ -140,7 +169,13 @@ function Retell({ onBack }: { onBack: () => void }) {
             <div
               key={img}
               className="tile-card"
-              style={{ display: 'grid', placeItems: 'center', padding: 'calc(var(--u)*.7)', aspectRatio: '3/4' }}
+              style={{
+                display: 'grid',
+                placeItems: 'center',
+                padding: 'calc(var(--u)*.7)',
+                aspectRatio: '3/4',
+                maxHeight: '46vh',
+              }}
             >
               <span
                 style={{
@@ -154,7 +189,7 @@ function Retell({ onBack }: { onBack: () => void }) {
               >
                 {n + 1}
               </span>
-              <WordArt word={wordById(img)} size="min(130px, 14vh)" float={false} />
+              <WordArt word={wordById(img)} size="min(130px, 16vh)" float={false} />
             </div>
           ))}
         </div>
