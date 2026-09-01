@@ -164,11 +164,17 @@ input {
   flex: none;
   display: flex;
   align-items: center;
+  min-width: 0;
   gap: calc(var(--u) * 1.2);
   padding: calc(var(--u) * 0.7) calc(var(--u) * 1.4);
   border-bottom: 1px solid rgba(255, 255, 255, 0.07);
   background: rgba(11, 4, 24, 0.5);
   backdrop-filter: blur(8px);
+}
+
+/* Only the flight path may shrink; every control keeps its size. */
+.topbar > * {
+  flex: none;
 }
 
 .brand {
@@ -188,7 +194,8 @@ input {
 }
 
 .grow {
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 /* ------------------------------------------------------------ phase map */
@@ -198,6 +205,14 @@ input {
   align-items: center;
   gap: clamp(4px, 1.6vw, 22px);
   position: relative;
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.phasemap::-webkit-scrollbar {
+  display: none;
 }
 
 /* the dotted flight path behind the planets */

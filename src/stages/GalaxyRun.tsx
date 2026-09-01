@@ -294,17 +294,20 @@ export function GalaxyRun() {
     >
       <StarBurst fire={burst} />
 
-      <div
-        className="board"
-        style={{
-          gridTemplateColumns: `repeat(${cols}, 1fr)`,
-          gridTemplateRows: `repeat(${rows}, 1fr)`,
-          aspectRatio: `${cols} / ${rows}`,
-          maxHeight: '100%',
-          maxWidth: 'min(1150px, 100%)',
-          margin: '0 auto',
-        }}
-      >
+      {/* The board is sized by the height it is given, so the whole route is
+          always on screen — a projector is short, not narrow. */}
+      <div style={{ height: '100%', width: '100%', display: 'grid', placeItems: 'center' }}>
+        <div
+          className="board"
+          style={{
+            gridTemplateColumns: `repeat(${cols}, 1fr)`,
+            gridTemplateRows: `repeat(${rows}, 1fr)`,
+            aspectRatio: `${cols} / ${rows}`,
+            height: '100%',
+            width: 'auto',
+            maxWidth: 'min(1150px, 100%)',
+          }}
+        >
         {positions.map((t) => {
           const info = TILE_INFO[t.kind];
           const here = pilots.filter((p) => p.pos === t.n);
@@ -339,8 +342,9 @@ export function GalaxyRun() {
                 </span>
               )}
             </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
       <TaskModal
