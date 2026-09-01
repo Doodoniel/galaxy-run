@@ -63,8 +63,8 @@ export function StoryBook({ open, onClose }: { open: boolean; onClose: () => voi
   const [override, setOverride] = useState(false);
   const [reading, setReading] = useState(false);
 
-  // Picture This is the one stage the text would ruin.
-  const spoils = state.stage === 'picture' && !state.picture.revealed;
+  // The listening step is the one place the text would ruin the task.
+  const spoils = state.activity === 'story' && state.story.heard < 6;
   const locked = spoils && !override;
 
   const close = () => {
@@ -80,8 +80,8 @@ export function StoryBook({ open, onClose }: { open: boolean; onClose: () => voi
           <div style={{ fontSize: 48 }}>🔒</div>
           <h3 style={{ fontSize: 24, margin: '8px 0' }}>Not yet, pilot.</h3>
           <p className="hint" style={{ maxWidth: 440, margin: '0 auto 18px' }}>
-            Picture This only works if you have not seen the text. Listen, draw your six pictures, write the story
-            from them — the original opens on the Check step.
+            The listening only works if you have not seen the text. Play all six sentences first — then the story
+            opens by itself.
           </p>
           <button className="btn btn--ghost btn--sm" onClick={() => setOverride(true)}>
             Teacher: open it anyway

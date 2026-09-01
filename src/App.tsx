@@ -1,19 +1,25 @@
 import { useEffect, useState } from 'react';
-import { STAGE_META, STAGE_ORDER, WORDS, type StageId } from './data/content';
+import { WORDS } from './data/content';
+import { phaseOf } from './data/lesson';
 import { GameProvider, useGame } from './state/game';
 import { Starfield } from './components/Starfield';
+import { PlanetBackdrop } from './components/Planet';
+import { ActivityBar, PhaseMap } from './components/GalaxyMap';
 import { MissionControl } from './components/MissionControl';
 import { StoryBook } from './components/StoryBook';
-import { LiftOff } from './stages/LiftOff';
-import { WordLab } from './stages/WordLab';
-import { Challenge } from './stages/Challenge';
-import { PictureThis } from './stages/PictureThis';
-import { StoryCheck } from './stages/StoryCheck';
+import { useFullscreen } from './components/Shell';
+import { Crew } from './stages/Crew';
+import { WordCards } from './stages/WordCards';
+import { StoryTime } from './stages/StoryTime';
+import { Vocab } from './stages/Vocab';
+import { Check } from './stages/Check';
+import { SpeedRound } from './stages/SpeedRound';
 import { GalaxyRun } from './stages/GalaxyRun';
 import { MyPlanet } from './stages/MyPlanet';
-import { Landing } from './stages/Landing';
+import { Report } from './stages/Report';
 import { MemoryCore } from './stages/MemoryCore';
-import { isMuted, setMuted, sfx, stopSpeaking } from './lib/audio';
+import { setMuted, sfx, stopSpeaking } from './lib/audio';
+import { tap } from './components/ui';
 
 export default function App() {
   return (
@@ -25,19 +31,18 @@ export default function App() {
 }
 
 function Mission() {
-  const { state, goto } = useGame();
+  const { state, update } = useGame();
   const [control, setControl] = useState(false);
   const [memory, setMemory] = useState(false);
   const [story, setStory] = useState(false);
-  const [mute, setMute] = useState(isMuted());
+  const full = useFullscreen();
 
-  useEffect(() => {
-    setMuted(state.muted);
-    setMute(state.muted);
-  }, [state.muted]);
+  const phase = phaseOf(state.activity);
 
-  // Warm the ten illustrations up front: a WORD card must be readable the
-  // instant it is revealed, not a second later.
+  useEffect(() => setMuted(state.muted), [state.muted]);
+
+  // Warm the ten illustrations up front: a card must be readable the instant
+  // it is revealed, not a second later.
   useEffect(() => {
     WORDS.forEach((w) => {
       const img = new Image();
@@ -47,44 +52,44 @@ function Mission() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      const typing = ['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName);
-      if (typing) return;
-      if (e.key.toLowerCase() === 't') setControl((c) => !c);
-      if (e.key.toLowerCase() === 'm') setMemory((m) => !m);
-      if (e.key.toLowerCase() === 's') setStory((s) => !s);
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      const k = e.key.toLowerCase();
+      if (k === 't') setControl((c) => !c);
+      if (k === 'm') setMemory((m) => !m);
+      if (k === 's') setStory((s) => !s);
+      if (k === 'f') full.toggle();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, []);
-
-  const stage = state.stage;
+  }, [full]);
 
   return (
-    <>
+    <div style={{ ['--phase' as string]: phase.colour, display: 'contents' }}>
+      <PlanetBackdrop look={phase.planet} />
+
       <header className="topbar">
-        <span className="topbar__brand">
-          <b>Galaxy&nbsp;Run</b> · Mission&nbsp;01
+        <span className="brand">
+          <b>Galaxy Run</b> Mission 01
         </span>
 
-        <nav className="stagestrip" aria-label="Mission stages">
-          {STAGE_ORDER.map((s: StageId) => (
-            <button
-              key={s}
-              data-state={s === stage ? 'current' : state.done.includes(s) ? 'done' : 'todo'}
-              onClick={() => {
-                stopSpeaking();
-                sfx.tap();
-                goto(s);
-                setMemory(false);
-              }}
-              title={`${STAGE_META[s].title} · ${STAGE_META[s].minutes} min`}
-            >
-              {STAGE_META[s].title}
-            </button>
-          ))}
-        </nav>
+        <PhaseMap />
+        <span className="grow" />
 
-        <span className="topbar__spacer" />
+        <button
+          className="btn btn--ghost btn--sm"
+          onClick={tap(() => update((d) => void (d.mode = d.mode === 'class' ? 'solo' : 'class')))}
+          title="Class = one shared screen, no typing. Solo = one learner, typing drills on."
+        >
+          {state.mode === 'class' ? '📽' : '🧑‍🚀'} <span className="hide-sm">{state.mode}</span>
+        </button>
+
+        <button
+          className={`btn btn--sm ${story ? '' : 'btn--ghost'}`}
+          onClick={tap(() => setStory((s) => !s))}
+          title="The story text (S)"
+        >
+          📖 <span className="hide-sm">Story</span>
+        </button>
 
         <button
           className={`btn btn--sm ${memory ? '' : 'btn--ghost'}`}
@@ -95,60 +100,51 @@ function Mission() {
           }}
           title="Vocabulary trainer (M)"
         >
-          🧠 <span className="hide-sm">Memory Core</span>
+          🧠 <span className="hide-sm">Memory</span>
         </button>
 
-        <button
-          className={`btn btn--sm ${story ? '' : 'btn--ghost'}`}
-          onClick={() => {
-            sfx.tap();
-            setStory((s) => !s);
-          }}
-          title="The story text (S)"
-        >
-          📖 <span className="hide-sm">Story</span>
+        <button className="icon-btn" data-on={full.on} onClick={full.toggle} title="Fullscreen (F)" aria-label="Fullscreen">
+          {full.on ? '⛶' : '⛶'}
         </button>
 
         <button
           className="icon-btn"
-          data-on={!mute}
+          data-on={!state.muted}
           onClick={() => {
-            const nextMuted = !mute;
-            setMuted(nextMuted);
-            setMute(nextMuted);
-            if (nextMuted) stopSpeaking();
-            else sfx.tap();
+            update((d) => void (d.muted = !d.muted));
+            if (state.muted) sfx.tap();
+            else stopSpeaking();
           }}
-          aria-label={mute ? 'Sound off' : 'Sound on'}
-          title="Sound"
+          aria-label={state.muted ? 'Sound off' : 'Sound on'}
         >
-          {mute ? '🔇' : '🔊'}
+          {state.muted ? '🔇' : '🔊'}
         </button>
 
-        <button className="icon-btn" onClick={() => setControl(true)} aria-label="Mission control" title="Mission control (T)">
+        <button className="icon-btn" onClick={() => setControl(true)} title="Mission control (T)" aria-label="Mission control">
           🛰
         </button>
       </header>
 
-      <main className="shell">
-        {memory ? (
-          <MemoryCore onClose={() => setMemory(false)} />
-        ) : (
-          <>
-            {stage === 'liftoff' && <LiftOff />}
-            {stage === 'wordlab' && <WordLab />}
-            {stage === 'challenge' && <Challenge />}
-            {stage === 'picture' && <PictureThis />}
-            {stage === 'storycheck' && <StoryCheck />}
-            {stage === 'run' && <GalaxyRun />}
-            {stage === 'planet' && <MyPlanet />}
-            {stage === 'landing' && <Landing />}
-          </>
-        )}
-      </main>
+      {!memory && <ActivityBar />}
+
+      {memory ? (
+        <MemoryCore onClose={() => setMemory(false)} />
+      ) : (
+        <>
+          {state.activity === 'crew' && <Crew />}
+          {state.activity === 'words' && <WordCards />}
+          {state.activity === 'story' && <StoryTime />}
+          {state.activity === 'vocab' && <Vocab />}
+          {state.activity === 'check' && <Check />}
+          {state.activity === 'speed' && <SpeedRound />}
+          {state.activity === 'run' && <GalaxyRun />}
+          {state.activity === 'planet' && <MyPlanet />}
+          {state.activity === 'report' && <Report />}
+        </>
+      )}
 
       <StoryBook open={story} onClose={() => setStory(false)} />
       <MissionControl open={control} onClose={() => setControl(false)} />
-    </>
+    </div>
   );
 }

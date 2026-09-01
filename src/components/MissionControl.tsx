@@ -1,16 +1,8 @@
 import { useEffect, useState } from 'react';
-import {
-  GAP_FILL,
-  METEOR_CARDS,
-  MIRA_CARDS,
-  STAGE_META,
-  STAGE_ORDER,
-  TRUE_FALSE,
-  WORDS,
-  type StageId,
-} from '../data/content';
-import { useGame } from '../state/game';
-import { Rocket, Star } from './ui';
+import { GAP_FILL, METEOR_CARDS, MIRA_CARDS, TRUE_FALSE, WORDS } from '../data/content';
+import { PHASES, activityOf, phaseOf } from '../data/lesson';
+import { useGame, type Mode } from '../state/game';
+import { Rocket, Star, tap } from './ui';
 import { sfx } from '../lib/audio';
 
 const fmt = (ms: number) => {
@@ -19,9 +11,9 @@ const fmt = (ms: number) => {
 };
 
 /**
- * The teacher's side panel: the score, the answer keys and the levers that the
- * printed lesson plan gives to the teacher (golden rule, MAKE IT HARDER,
- * jumping stages when the clock runs out).
+ * The teacher's side panel: the score, the answer keys, the lesson clock and
+ * the levers the printed plan hands the teacher — the golden rule, MAKE IT
+ * HARDER, and jumping phases when the clock runs out.
  */
 export function MissionControl({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { state, update, goto, reset } = useGame();
@@ -36,40 +28,24 @@ export function MissionControl({ open, onClose }: { open: boolean; onClose: () =
   }, [t0]);
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && open) onClose();
-    };
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [open, onClose]);
 
   if (!open) return null;
 
+  const here = activityOf(state.activity);
+  const phase = phaseOf(state.activity);
+
   return (
-    <div
-      onClick={onClose}
-      style={{ position: 'fixed', inset: 0, zIndex: 120, background: 'rgba(6,2,14,.6)', backdropFilter: 'blur(4px)' }}
-    >
-      <aside
-        onClick={(e) => e.stopPropagation()}
-        className="pop"
-        style={{
-          position: 'absolute',
-          top: 0,
-          right: 0,
-          bottom: 0,
-          width: 'min(460px, 100%)',
-          background: 'linear-gradient(180deg,#1d0c37,#150826)',
-          borderLeft: '1px solid var(--card-line)',
-          padding: 18,
-          overflowY: 'auto',
-          boxShadow: '-24px 0 60px rgba(0,0,0,.5)',
-        }}
-      >
-        <div className="row" style={{ justifyContent: 'space-between', marginBottom: 12 }}>
+    <div className="scrim" style={{ padding: 0, placeItems: 'stretch' }} onClick={onClose}>
+      <aside className="drawer pop" onClick={(e) => e.stopPropagation()}>
+        <div className="row" style={{ justifyContent: 'space-between' }}>
           <div>
             <div className="eyebrow">Teacher only</div>
-            <h2 style={{ fontSize: 24 }}>Mission Control</h2>
+            <h2 style={{ fontSize: 'clamp(17px, 2.6vh, 23px)' }}>Mission Control</h2>
           </div>
           <button className="icon-btn" onClick={onClose} aria-label="Close mission control">
             ✕
@@ -77,106 +53,104 @@ export function MissionControl({ open, onClose }: { open: boolean; onClose: () =
         </div>
 
         {/* lesson clock */}
-        <div className="tile-card" style={{ padding: 14, marginBottom: 14 }}>
+        <div className="tile-card" style={{ marginTop: 'calc(var(--u)*.9)' }}>
           <div className="row" style={{ justifyContent: 'space-between' }}>
             <div>
               <span className="card-label">Lesson clock</span>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 30 }}>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(20px, 3.4vh, 30px)' }}>
                 {t0 === null ? '00:00' : fmt(now - t0)}
-                <span className="hint" style={{ fontSize: 14 }}> / 60:00</span>
+                <span className="hint"> / 60:00</span>
               </div>
             </div>
-            <div className="btn-row">
-              <button className="btn btn--sm" onClick={() => setT0(t0 === null ? Date.now() : null)}>
-                {t0 === null ? 'Start' : 'Stop'}
-              </button>
-            </div>
+            <button className="btn btn--sm" onClick={() => setT0(t0 === null ? Date.now() : null)}>
+              {t0 === null ? 'Start' : 'Stop'}
+            </button>
           </div>
-          <div className="hint" style={{ marginTop: 6 }}>
-            Now: {STAGE_META[state.stage].title} · plan {STAGE_META[state.stage].minutes} min
+          <div className="hint" style={{ marginTop: 4 }}>
+            {phase.stage} · {here.title} · plan {here.minutes} min
           </div>
         </div>
 
-        <div className="row" style={{ gap: 6, marginBottom: 14 }}>
+        {/* mode */}
+        <div className="row" style={{ gap: 6, marginTop: 'calc(var(--u)*.9)' }}>
+          {(['class', 'solo'] as Mode[]).map((m) => (
+            <button
+              key={m}
+              className={`btn btn--sm ${state.mode === m ? '' : 'btn--ghost'}`}
+              onClick={tap(() => update((d) => void (d.mode = m)))}
+            >
+              {m === 'class' ? '📽 Class' : '🧑‍🚀 Solo'}
+            </button>
+          ))}
+          <span className="hint">{state.mode === 'class' ? 'no typing anywhere' : 'typing drills on'}</span>
+        </div>
+
+        <div className="row" style={{ gap: 6, margin: 'calc(var(--u)*.9) 0' }}>
           {(['crew', 'keys', 'plan'] as const).map((t) => (
-            <button key={t} className={`btn btn--sm ${tab === t ? '' : 'btn--ghost'}`} onClick={() => setTab(t)}>
-              {t === 'crew' ? 'Crew & stars' : t === 'keys' ? 'Answer keys' : 'Stages'}
+            <button key={t} className={`btn btn--sm ${tab === t ? '' : 'btn--ghost'}`} onClick={tap(() => setTab(t))}>
+              {t === 'crew' ? 'Crew & stars' : t === 'keys' ? 'Answer keys' : 'The plan'}
             </button>
           ))}
         </div>
 
         {/* ------------------------------------------------------- crew */}
         {tab === 'crew' && (
-          <div className="stack">
+          <div className="col">
             {state.pilots.map((p, i) => (
-              <div key={p.id} className="tile-card" style={{ ['--accent' as string]: p.colour, padding: 13 }}>
+              <div key={p.id} className="tile-card" style={{ ['--accent' as string]: p.colour }}>
                 <div className="row" style={{ justifyContent: 'space-between' }}>
-                  <div className="row" style={{ gap: 8 }}>
-                    <Rocket colour={p.colour} size={26} tilt={0} />
-                    <b style={{ fontFamily: 'var(--font-display)', fontSize: 18 }}>{p.callsign}</b>
-                  </div>
+                  <span className="row" style={{ gap: 8 }}>
+                    <Rocket colour={p.colour} size={24} />
+                    <b style={{ fontFamily: 'var(--font-display)' }}>{p.callsign}</b>
+                  </span>
                   <span className="pill">
-                    <Star size={13} /> {p.stars}
+                    <Star size={12} /> {p.stars}
                   </span>
                 </div>
-                <div className="row" style={{ gap: 6, marginTop: 10 }}>
+                <div className="row" style={{ gap: 5, marginTop: 8 }}>
                   <button
                     className="btn btn--star btn--sm"
                     onClick={() => {
                       sfx.star();
-                      update((d) => {
-                        d.pilots[i].stars += 1;
-                      });
+                      update((d) => void d.pilots[i].stars++);
                     }}
                   >
                     +1 star
                   </button>
                   <button
                     className="btn btn--ghost btn--sm"
-                    onClick={() =>
-                      update((d) => {
-                        d.pilots[i].stars = Math.max(0, d.pilots[i].stars - 1);
-                      })
-                    }
+                    onClick={() => update((d) => void (d.pilots[i].stars = Math.max(0, d.pilots[i].stars - 1)))}
                   >
                     −1
                   </button>
                   <button
                     className="btn btn--bad btn--sm"
-                    title="Russian on your turn — the rocket stays / goes back one tile"
+                    title="Russian on your turn — the rocket goes back one tile"
                     onClick={() => {
                       sfx.wrong();
-                      update((d) => {
-                        d.pilots[i].pos = Math.max(0, d.pilots[i].pos - 1);
-                      });
+                      update((d) => void (d.pilots[i].pos = Math.max(0, d.pilots[i].pos - 1)));
                     }}
                   >
-                    Golden rule −1 tile
+                    Golden rule −1
                   </button>
                 </div>
-                <div className="hint" style={{ marginTop: 6 }}>
-                  tile {p.pos}/20 · shields {p.shields} · speed record {p.best}/10
+                <div className="hint" style={{ marginTop: 5 }}>
+                  tile {p.pos}/20 · shields {p.shields} · speed {p.best}/10
                 </div>
               </div>
             ))}
 
-            <label
-              style={{ display: 'flex', gap: 10, marginTop: 6, cursor: 'pointer', alignItems: 'flex-start' }}
-            >
+            <label style={{ display: 'flex', gap: 10, cursor: 'pointer', alignItems: 'flex-start' }}>
               <input
                 type="checkbox"
-                style={{ marginTop: 6, flex: 'none' }}
+                style={{ marginTop: 5, flex: 'none' }}
                 checked={state.hard}
-                onChange={(e) =>
-                  update((d) => {
-                    d.hard = e.target.checked;
-                  })
-                }
+                onChange={(e) => update((d) => void (d.hard = e.target.checked))}
               />
               <span>
                 <b>MAKE IT HARDER</b>
                 <div className="hint">
-                  WORD tiles: one sentence only · METEOR: say the rule too · STAR: 20 seconds instead of 15.
+                  WORD: one sentence only · METEOR: name the rule · STAR: 20 seconds instead of 15.
                 </div>
               </span>
             </label>
@@ -194,22 +168,22 @@ export function MissionControl({ open, onClose }: { open: boolean; onClose: () =
 
         {/* ------------------------------------------------------- keys */}
         {tab === 'keys' && (
-          <div className="stack" style={{ gap: 10 }}>
-            <Key title="Worksheet 1A · match">
+          <div className="col" style={{ gap: 8 }}>
+            <Key title="Words & meanings">
               {WORDS.map((w, i) => (
                 <div key={w.id}>
                   <b>{i + 1}</b> {w.word} — {w.definition}
                 </div>
               ))}
             </Key>
-            <Key title="Worksheet 1B · gaps">
+            <Key title="Sentences · the missing words">
               {GAP_FILL.map((g, i) => (
                 <div key={i}>
                   <b>{i + 1}</b> {g.surface.join(' / ')}
                 </div>
               ))}
             </Key>
-            <Key title="Worksheet 3A · true / false">
+            <Key title="True / false">
               {TRUE_FALSE.map((t, i) => (
                 <div key={i}>
                   <b>{i + 1}</b> {t.answer ? 'T' : 'F'}
@@ -217,7 +191,7 @@ export function MissionControl({ open, onClose }: { open: boolean; onClose: () =
                 </div>
               ))}
             </Key>
-            <Key title="Meteor cards · the fix">
+            <Key title="Meteors · the fix">
               {METEOR_CARDS.map((c, i) => (
                 <div key={c.id}>
                   <b>{i + 1}</b> {c.tokens.join(' ')} → <span style={{ color: 'var(--green)' }}>{c.fix}</span>{' '}
@@ -225,7 +199,7 @@ export function MissionControl({ open, onClose }: { open: boolean; onClose: () =
                 </div>
               ))}
             </Key>
-            <Key title="Mira cards · answers">
+            <Key title="Mira · story answers">
               {MIRA_CARDS.map((c, i) => (
                 <div key={c.id}>
                   <b>{i + 1}</b> {c.q} — <span style={{ color: 'var(--green)' }}>{c.a}</span>
@@ -238,30 +212,41 @@ export function MissionControl({ open, onClose }: { open: boolean; onClose: () =
           </div>
         )}
 
-        {/* ------------------------------------------------------ stages */}
+        {/* ------------------------------------------------------- plan */}
         {tab === 'plan' && (
-          <div className="stack" style={{ gap: 8 }}>
-            {STAGE_ORDER.map((s: StageId) => (
-              <button
-                key={s}
-                className="choice"
-                data-state={state.stage === s ? 'right' : state.done.includes(s) ? 'muted' : undefined}
-                onClick={() => {
-                  goto(s);
-                  onClose();
-                }}
-              >
-                <span className="choice__key">{STAGE_META[s].minutes.split('–')[0]}</span>
-                <span style={{ flex: 1 }}>
-                  <b>{STAGE_META[s].title}</b>
-                  <div className="hint">{STAGE_META[s].sub}</div>
+          <div className="col" style={{ gap: 10 }}>
+            {PHASES.map((p, n) => (
+              <div key={p.id} className="tile-card" style={{ ['--accent' as string]: p.colour }}>
+                <span className="card-label" style={{ ['--accent' as string]: p.colour }}>
+                  {n + 1} · {p.stage} · {p.minutes} min
                 </span>
-                <span className="hint">{STAGE_META[s].minutes}′</span>
-              </button>
+                <b style={{ fontFamily: 'var(--font-display)', display: 'block' }}>{p.title}</b>
+                <div className="hint">{p.aim}</div>
+                <div className="col" style={{ gap: 4, marginTop: 6 }}>
+                  {p.activities.map((a) => (
+                    <button
+                      key={a.id}
+                      className="opt"
+                      style={{ padding: '6px 10px', fontSize: 'clamp(12px,1.7vh,15px)' }}
+                      data-state={state.activity === a.id ? 'right' : state.done.includes(a.id) ? 'muted' : undefined}
+                      onClick={() => {
+                        goto(a.id);
+                        onClose();
+                      }}
+                    >
+                      <span style={{ flex: 1 }}>
+                        <b>{a.title}</b>
+                        <div className="hint">{a.sub}</div>
+                      </span>
+                      <span className="hint">{a.minutes}′</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
             ))}
             <p className="hint">
-              Short on time? Cut Picture This to four sentences and Story Check to task A. Never cut the game — that is
-              the core of the lesson.
+              Short on time? Cut the story retell and the speed round. Never cut Galaxy Run — the production phase is
+              the point of the hour.
             </p>
           </div>
         )}
@@ -272,9 +257,9 @@ export function MissionControl({ open, onClose }: { open: boolean; onClose: () =
 
 function Key({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <details className="tile-card" style={{ padding: 12 }}>
+    <details className="tile-card" style={{ padding: 'calc(var(--u)*.9)' }}>
       <summary style={{ cursor: 'pointer', fontFamily: 'var(--font-display)' }}>{title}</summary>
-      <div className="stack" style={{ gap: 3, marginTop: 8, fontSize: 14 }}>
+      <div className="col" style={{ gap: 2, marginTop: 6, fontSize: 'clamp(12px,1.7vh,14px)' }}>
         {children}
       </div>
     </details>

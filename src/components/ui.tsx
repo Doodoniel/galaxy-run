@@ -4,18 +4,6 @@ import { sfx, speak } from '../lib/audio';
 
 /* ------------------------------------------------------------------ stars */
 
-export function Stars({ n, max = 0, size = 18 }: { n: number; max?: number; size?: number }) {
-  const total = Math.max(max, n);
-  return (
-    <span className="starline" aria-label={`${n} stars`}>
-      {Array.from({ length: total }, (_, i) => (
-        <Star key={i} size={size} filled={i < n} />
-      ))}
-      {total === 0 && <Star size={size} filled={false} />}
-    </span>
-  );
-}
-
 export function Star({ size = 18, filled = true }: { size?: number; filled?: boolean }) {
   return (
     <svg
@@ -31,45 +19,37 @@ export function Star({ size = 18, filled = true }: { size?: number; filled?: boo
   );
 }
 
-/* ---------------------------------------------------------------- header */
-
-export function StageHead({
-  eyebrow,
-  title,
-  sub,
-  right,
-}: {
-  eyebrow: string;
-  title: string;
-  sub?: string;
-  right?: ReactNode;
-}) {
-  return (
-    <header className="stage-head">
-      <div style={{ flex: 1, minWidth: 240 }}>
-        <div className="eyebrow">{eyebrow}</div>
-        <h1>{title}</h1>
-        {sub && <p>{sub}</p>}
-      </div>
-      {right}
-    </header>
-  );
-}
-
 /* --------------------------------------------------------------- artwork */
 
-export function WordArt({ word, size = 200, float = true }: { word: Word; size?: number; float?: boolean }) {
+export function WordArt({
+  word,
+  size = 200,
+  float = true,
+}: {
+  word: Word;
+  /** A number is pixels; a string is any CSS length, e.g. "min(260px, 32vh)". */
+  size?: number | string;
+  float?: boolean;
+}) {
+  const dim = typeof size === 'number' ? `${size}px` : size;
   return (
     <div
       className={float ? 'float' : undefined}
-      style={{ width: size, height: size, display: 'grid', placeItems: 'center' }}
+      style={{
+        width: dim,
+        height: dim,
+        display: 'grid',
+        placeItems: 'center',
+        maxWidth: '100%',
+        maxHeight: '100%',
+        minHeight: 0,
+        flex: 'none',
+      }}
     >
       <img
         className="word-art"
         src={`${import.meta.env.BASE_URL}art/${word.image}.webp`}
         alt={word.word}
-        width={size}
-        height={size}
         decoding="async"
       />
     </div>
@@ -106,9 +86,9 @@ export function SayIt({ text, label = 'Say it' }: { text: string; label?: string
   );
 }
 
-/* ---------------------------------------------------------------- choice */
+/* --------------------------------------------------------------- options */
 
-export function Choice({
+export function Opt({
   children,
   onClick,
   state,
@@ -122,20 +102,20 @@ export function Choice({
   disabled?: boolean;
 }) {
   return (
-    <button className="choice" data-state={state} onClick={onClick} disabled={disabled}>
-      {hotkey && <span className="choice__key">{hotkey}</span>}
+    <button className="opt" data-state={state} onClick={onClick} disabled={disabled}>
+      {hotkey && <span className="opt__key">{hotkey}</span>}
       <span style={{ flex: 1 }}>{children}</span>
     </button>
   );
 }
 
-/* --------------------------------------------------------------- progress */
-
-export function Progress({ value, max }: { value: number; max: number }) {
-  const pct = max ? Math.min(100, (value / max) * 100) : 0;
+/** Progress dots for a one-question-at-a-time task. */
+export function Dots({ marks, at }: { marks: (boolean | null)[]; at: number }) {
   return (
-    <div className="progress" role="progressbar" aria-valuenow={value} aria-valuemax={max}>
-      <i style={{ width: `${pct}%` }} />
+    <div className="dots" aria-hidden="true">
+      {marks.map((m, i) => (
+        <i key={i} data-state={i === at ? 'now' : m === true ? 'right' : m === false ? 'wrong' : undefined} />
+      ))}
     </div>
   );
 }
@@ -151,7 +131,7 @@ export function CountdownRing({
   running,
   runKey,
   onDone,
-  size = 128,
+  size = 120,
   label,
 }: {
   seconds: number;
@@ -180,8 +160,6 @@ export function CountdownRing({
         done.current = true;
         window.clearInterval(id);
         onDone?.();
-      } else if (next <= 3.02 && Math.ceil(next) !== Math.ceil(next + 0.1)) {
-        sfx.tick();
       }
     }, 100);
     return () => window.clearInterval(id);
@@ -212,17 +190,21 @@ export function CountdownRing({
         />
         <text
           x="50%"
-          y="52%"
+          y="53%"
           textAnchor="middle"
           dominantBaseline="middle"
           fontFamily="var(--font-display)"
-          fontSize={size * 0.32}
+          fontSize={size * 0.34}
           fill={danger ? 'var(--red)' : 'var(--ink)'}
         >
           {Math.ceil(left)}
         </text>
       </svg>
-      {label && <div className="hint" style={{ marginTop: 4 }}>{label}</div>}
+      {label && (
+        <div className="hint" style={{ marginTop: 2 }}>
+          {label}
+        </div>
+      )}
     </div>
   );
 }
@@ -237,15 +219,16 @@ export function Verdict({ ok, text }: { ok: boolean; text: string }) {
         display: 'flex',
         alignItems: 'center',
         gap: 10,
-        padding: '12px 16px',
+        padding: 'calc(var(--u) * .7) calc(var(--u) * 1.2)',
         borderRadius: 'var(--r-md)',
         background: ok ? 'rgba(63,191,90,.16)' : 'rgba(244,68,46,.16)',
         border: `1px solid ${ok ? 'var(--green)' : 'var(--red)'}`,
         color: ok ? '#b8f5c5' : '#ffc4bb',
         fontWeight: 700,
+        fontSize: 'clamp(13px, 1.9vh, 18px)',
       }}
     >
-      <span style={{ fontSize: 20 }}>{ok ? '✅' : '☄️'}</span>
+      <span>{ok ? '✅' : '☄️'}</span>
       <span>{text}</span>
     </div>
   );
@@ -253,16 +236,17 @@ export function Verdict({ ok, text }: { ok: boolean; text: string }) {
 
 /* --------------------------------------------------------------- rockets */
 
-export function Rocket({ colour, size = 34, tilt = -45 }: { colour: string; size?: number; tilt?: number }) {
+export function Rocket({ colour, size = 34, tilt = 0 }: { colour: string; size?: number; tilt?: number }) {
+  const id = colour.replace('#', '');
   return (
     <svg width={size} height={size} viewBox="0 0 64 64" style={{ transform: `rotate(${tilt}deg)` }} aria-hidden="true">
       <defs>
-        <linearGradient id={`fl-${colour.slice(1)}`} x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id={`fl-${id}`} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#ffd76a" />
           <stop offset="1" stopColor="#ff6a2b" />
         </linearGradient>
       </defs>
-      <path d="M32 60c-4-4-6-8-6-12h12c0 4-2 8-6 12z" fill={`url(#fl-${colour.slice(1)})`} />
+      <path d="M32 60c-4-4-6-8-6-12h12c0 4-2 8-6 12z" fill={`url(#fl-${id})`} />
       <path d="M32 3c8 7 12 17 12 28v10H20V31C20 20 24 10 32 3z" fill={colour} stroke="#0d0620" strokeWidth="3" />
       <path d="M20 33 10 46v6l10-6z" fill={colour} stroke="#0d0620" strokeWidth="3" strokeLinejoin="round" />
       <path d="M44 33l10 13v6l-10-6z" fill={colour} stroke="#0d0620" strokeWidth="3" strokeLinejoin="round" />
@@ -276,33 +260,39 @@ export function PilotChip({
   colour,
   stars,
   active,
-  compact,
+  onClick,
 }: {
   callsign: string;
   colour: string;
   stars?: number;
   active?: boolean;
-  compact?: boolean;
+  onClick?: () => void;
 }) {
-  return (
-    <div
+  const body = (
+    <span
       className="pill"
       style={{
         borderColor: active ? colour : 'var(--card-line)',
-        background: active ? `${colour}22` : 'rgba(255,255,255,.06)',
+        background: active ? `${colour}26` : 'rgba(255,255,255,.06)',
         color: active ? '#fff' : 'var(--ink-soft)',
-        boxShadow: active ? `0 0 18px ${colour}55` : 'none',
-        padding: compact ? '3px 10px' : '5px 13px',
+        boxShadow: active ? `0 0 16px ${colour}55` : 'none',
       }}
     >
-      <Rocket colour={colour} size={compact ? 15 : 18} tilt={0} />
+      <Rocket colour={colour} size={16} />
       <b style={{ fontFamily: 'var(--font-display)' }}>{callsign || '—'}</b>
       {stars !== undefined && (
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-          <Star size={13} /> {stars}
+          <Star size={12} /> {stars}
         </span>
       )}
-    </div>
+    </span>
+  );
+
+  if (!onClick) return body;
+  return (
+    <button onClick={onClick} style={{ background: 'none', border: 'none', padding: 0 }}>
+      {body}
+    </button>
   );
 }
 
@@ -311,14 +301,12 @@ export function PilotChip({
 /** A quick shower of stars, fired when a pilot earns one. */
 export function StarBurst({ fire }: { fire: number }) {
   const [items, setItems] = useState<{ id: number; x: number; d: number }[]>([]);
+
   useEffect(() => {
     if (!fire) return;
-    const batch = Array.from({ length: 14 }, (_, i) => ({
-      id: fire * 100 + i,
-      x: 12 + Math.random() * 76,
-      d: Math.random() * 0.35,
-    }));
-    setItems(batch);
+    setItems(
+      Array.from({ length: 14 }, (_, i) => ({ id: fire * 100 + i, x: 12 + Math.random() * 76, d: Math.random() * 0.35 })),
+    );
     const id = window.setTimeout(() => setItems([]), 1500);
     return () => window.clearTimeout(id);
   }, [fire]);
@@ -329,23 +317,18 @@ export function StarBurst({ fire }: { fire: number }) {
       {items.map((it) => (
         <span
           key={it.id}
-          style={{
-            position: 'absolute',
-            left: `${it.x}%`,
-            top: '52%',
-            animation: `burst 1.2s ${it.d}s cubic-bezier(.2,.7,.3,1) both`,
-          }}
+          style={{ position: 'absolute', left: `${it.x}%`, top: '55%', animation: `burst 1.2s ${it.d}s ease-out both` }}
         >
-          <Star size={22 + Math.random() * 16} />
+          <Star size={20 + Math.random() * 16} />
         </span>
       ))}
       <style>{`@keyframes burst{0%{opacity:0;transform:translateY(0) scale(.3) rotate(0)}
-        18%{opacity:1}100%{opacity:0;transform:translateY(-46vh) scale(1.15) rotate(220deg)}}`}</style>
+        18%{opacity:1}100%{opacity:0;transform:translateY(-44vh) scale(1.15) rotate(220deg)}}`}</style>
     </div>
   );
 }
 
-/* ------------------------------------------------------------- utilities */
+/* ---------------------------------------------------------------- modal */
 
 export function Modal({
   open,
@@ -369,30 +352,10 @@ export function Modal({
 
   if (!open) return null;
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label={title}
-      onClick={onClose}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 100,
-        background: 'rgba(6,2,14,.72)',
-        backdropFilter: 'blur(6px)',
-        display: 'grid',
-        placeItems: 'center',
-        padding: 16,
-        overflowY: 'auto',
-      }}
-    >
-      <div
-        className="panel pop"
-        onClick={(e) => e.stopPropagation()}
-        style={{ width: `min(${width}px, 100%)`, background: 'rgba(24,10,44,.96)', maxHeight: '86dvh', overflowY: 'auto' }}
-      >
-        <div className="row" style={{ justifyContent: 'space-between', marginBottom: 14 }}>
-          <h2 style={{ fontSize: 24 }}>{title}</h2>
+    <div className="scrim" role="dialog" aria-modal="true" aria-label={title} onClick={onClose}>
+      <div className="modal pop" onClick={(e) => e.stopPropagation()} style={{ width: `min(${width}px, 100%)` }}>
+        <div className="row" style={{ justifyContent: 'space-between', marginBottom: 'calc(var(--u)*1)' }}>
+          <h2 style={{ fontSize: 'clamp(17px, 2.6vh, 24px)' }}>{title}</h2>
           <button className="icon-btn" onClick={onClose} aria-label="Close">
             ✕
           </button>
@@ -402,6 +365,8 @@ export function Modal({
     </div>
   );
 }
+
+/* ------------------------------------------------------------- utilities */
 
 export function shuffle<T>(list: T[], seed = Math.random()) {
   const arr = [...list];
@@ -415,4 +380,12 @@ export function shuffle<T>(list: T[], seed = Math.random()) {
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
   return arr;
+}
+
+/** Fires `sfx.tap` and runs the handler — used by the many small buttons. */
+export function tap(fn: () => void) {
+  return () => {
+    sfx.tap();
+    fn();
+  };
 }

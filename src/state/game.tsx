@@ -8,12 +8,23 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import type { StageId, WordId } from '../data/content';
-import { STAGE_ORDER, WORDS } from '../data/content';
+import { WORDS, type WordId } from '../data/content';
+import { ALL_ACTIVITIES, nextActivity, type ActivityId } from '../data/lesson';
+import type { PlanetLook } from '../data/lesson';
 
 /* ------------------------------------------------------------------ *
- * Shape of the mission
+ * How the mission is being run
  * ------------------------------------------------------------------ */
+
+/**
+ * `class`  — one screen for everybody: a projector, or a shared screen in a
+ *            video call. Nobody types; the teacher (or one pilot at the
+ *            keyboard) taps, and the crew answers out loud.
+ * `solo`   — one learner on their own device: typing drills are switched on
+ *            and the reflection fields appear, because there is somebody
+ *            there to fill them in.
+ */
+export type Mode = 'class' | 'solo';
 
 export const PILOT_COLOURS = [
   { id: 'red', hex: '#f4442e', name: 'Red' },
@@ -23,6 +34,13 @@ export const PILOT_COLOURS = [
   { id: 'pink', hex: '#ff5cc8', name: 'Pink' },
   { id: 'violet', hex: '#a855f7', name: 'Violet' },
 ];
+
+export interface PlanetSheet extends PlanetLook {
+  name: string;
+  /** Three mission words the visitor learns there — picked, never typed. */
+  words: WordId[];
+  pitched: boolean;
+}
 
 export interface Pilot {
   id: string;
@@ -34,66 +52,33 @@ export interface Pilot {
   shields: number;
   /** Finishing place in the race, 1-based; null while still flying. */
   place: number | null;
-  /** Best Chameleon Challenge score (words in 60 seconds). */
+  /** Best Speed Round score (words in 60 seconds). */
   best: number;
   /** Vocabulary mastery, 0…5 per word — drives the Memory Core queue. */
   mastery: Record<string, number>;
   planet: PlanetSheet;
-  /** Worksheet 6 — the pilot's own notes. */
-  logbook: { bestMoment: string; oneWord: string; questions: [string, string, string] };
 }
 
-export interface PlanetSheet {
-  name: string;
-  hue: number;
-  ring: boolean;
-  pattern: number;
-  moons: number;
-  words: [string, string, string];
-  rule: string;
-  people: string;
-  pitch: Record<string, string>;
-  pitched: boolean;
+export interface Result {
+  right: number;
+  total: number;
+  ms?: number;
 }
 
 export interface MissionState {
   v: number;
-  started: boolean;
-  stage: StageId;
+  mode: Mode;
+  activity: ActivityId;
+  done: ActivityId[];
   pilots: Pilot[];
-  /** Whose turn it is during turn-based stages. */
+  /** Whose turn it is during turn-based activities. */
   turn: number;
   hard: boolean;
   muted: boolean;
-  /** Stages the crew has completed. */
-  done: StageId[];
-
-  wordlab: {
-    introduced: string[];
-    ccq: Record<string, boolean>;
-    matched: Record<string, boolean>;
-    gaps: Record<string, string>;
-    gapsChecked: boolean;
-  };
-
-  picture: {
-    heard: number;
-    drawings: (string | null)[];
-    retell: string;
-    remembered: number | null;
-    revealed: boolean;
-  };
-
-  storycheck: {
-    tf: (boolean | null)[];
-    tfChecked: boolean;
-    tfMs: number;
-    meteorsFixed: string[];
-    meteorMs: number;
-  };
-
+  /** What the crew scored, per activity — the feedback phase reads this. */
+  results: Partial<Record<ActivityId, Result>>;
+  story: { heard: number; retold: boolean };
   run: {
-    started: boolean;
     round: number;
     log: string[];
     usedWord: string[];
@@ -105,14 +90,11 @@ export interface MissionState {
 
 const emptyPlanet = (): PlanetSheet => ({
   name: '',
+  type: 'rocky',
   hue: Math.floor(Math.random() * 360),
   ring: true,
-  pattern: 0,
   moons: 1,
-  words: ['', '', ''],
-  rule: '',
-  people: '',
-  pitch: {},
+  words: [],
   pitched: false,
 });
 
@@ -127,22 +109,20 @@ export const makePilot = (i: number, callsign = ''): Pilot => ({
   best: 0,
   mastery: Object.fromEntries(WORDS.map((w) => [w.id, 0])),
   planet: emptyPlanet(),
-  logbook: { bestMoment: '', oneWord: '', questions: ['', '', ''] },
 });
 
 const initialState = (): MissionState => ({
-  v: 1,
-  started: false,
-  stage: 'liftoff',
+  v: 2,
+  mode: 'class',
+  activity: 'crew',
+  done: [],
   pilots: [makePilot(0), makePilot(1)],
   turn: 0,
   hard: false,
   muted: false,
-  done: [],
-  wordlab: { introduced: [], ccq: {}, matched: {}, gaps: {}, gapsChecked: false },
-  picture: { heard: 0, drawings: [null, null, null, null, null, null], retell: '', remembered: null, revealed: false },
-  storycheck: { tf: Array(10).fill(null), tfChecked: false, tfMs: 0, meteorsFixed: [], meteorMs: 0 },
-  run: { started: false, round: 1, log: [], usedWord: [], usedMeteor: [], usedMira: [], usedStar: [] },
+  results: {},
+  story: { heard: 0, retold: false },
+  run: { round: 1, log: [], usedWord: [], usedMeteor: [], usedMira: [], usedStar: [] },
 });
 
 /* ------------------------------------------------------------------ *
@@ -156,8 +136,9 @@ function load(): MissionState {
     const raw = localStorage.getItem(KEY);
     if (!raw) return initialState();
     const saved = JSON.parse(raw) as MissionState;
-    if (saved?.v !== 1) return initialState();
-    // Merge over a fresh state so a new field never lands as undefined.
+    // Older saves belong to the pre-PPP structure: start clean rather than
+    // half-restoring a mission whose stages no longer exist.
+    if (saved?.v !== 2) return initialState();
     return { ...initialState(), ...saved };
   } catch {
     return initialState();
@@ -180,10 +161,13 @@ type Recipe = (draft: MissionState) => void;
 
 interface Ctx {
   state: MissionState;
+  /** True when typing-based tasks are allowed. */
+  typing: boolean;
   update: (recipe: Recipe) => void;
   reset: () => void;
-  goto: (stage: StageId) => void;
+  goto: (activity: ActivityId) => void;
   next: () => void;
+  finish: (activity: ActivityId, result?: Result) => void;
   award: (pilotIndex: number, stars?: number) => void;
 }
 
@@ -213,23 +197,27 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const goto = useCallback(
-    (stage: StageId) => {
+    (activity: ActivityId) => update((d) => void (d.activity = activity)),
+    [update],
+  );
+
+  /** Mark the current activity done and move on. */
+  const next = useCallback(() => {
+    update((d) => {
+      if (!d.done.includes(d.activity)) d.done.push(d.activity);
+      d.activity = nextActivity(d.activity) ?? ALL_ACTIVITIES[ALL_ACTIVITIES.length - 1];
+    });
+  }, [update]);
+
+  const finish = useCallback(
+    (activity: ActivityId, result?: Result) => {
       update((d) => {
-        d.stage = stage;
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (!d.done.includes(activity)) d.done.push(activity);
+        if (result) d.results[activity] = result;
       });
     },
     [update],
   );
-
-  const next = useCallback(() => {
-    update((d) => {
-      if (!d.done.includes(d.stage)) d.done.push(d.stage);
-      const i = STAGE_ORDER.indexOf(d.stage);
-      d.stage = STAGE_ORDER[Math.min(i + 1, STAGE_ORDER.length - 1)];
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-  }, [update]);
 
   const award = useCallback(
     (pilotIndex: number, stars = 1) => {
@@ -242,8 +230,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo<Ctx>(
-    () => ({ state, update, reset, goto, next, award }),
-    [state, update, reset, goto, next, award],
+    () => ({ state, typing: state.mode === 'solo', update, reset, goto, next, finish, award }),
+    [state, update, reset, goto, next, finish, award],
   );
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;
@@ -261,11 +249,6 @@ export function useGame() {
 
 export function masteryOf(pilot: Pilot | undefined, id: WordId) {
   return pilot?.mastery?.[id] ?? 0;
-}
-
-export function crewMastery(pilots: Pilot[], id: WordId) {
-  if (!pilots.length) return 0;
-  return pilots.reduce((sum, p) => sum + masteryOf(p, id), 0) / pilots.length;
 }
 
 export function leaderboard(pilots: Pilot[]) {
