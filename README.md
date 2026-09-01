@@ -46,8 +46,7 @@ Switch it on the briefing screen or from the top bar at any time.
 ## Always available
 
 - **📖 Story** (`S`) — the text on the wall. In the printed lesson the story is pinned up for the whole hour;
-  this is that sheet, with the ten target words marked and a "read it to me" button. It stays locked during
-  the listening step, with a teacher override.
+  this is that sheet, with the ten target words marked. Reading only — no playback.
 - **🧠 Memory Core** (`M`) — the vocabulary trainer. Every word carries a mastery level 0–5 per pilot and the
   drill gets harder as the level rises: picture → word → meaning → by ear → spell it. A wrong answer drops
   the level, so a shaky word keeps coming back. This is the mode to set as homework.
