@@ -3,7 +3,6 @@ import { OBJECTIVES } from '../data/lesson';
 import { makePilot, PILOT_COLOURS, useGame, type Mode } from '../state/game';
 import { Modal, Rocket, tap } from '../components/ui';
 import { NextButton, Stage } from '../components/Shell';
-import { sfx } from '../lib/audio';
 
 const IDEAS = ['Falcon', 'Nova', 'Comet', 'Orbit', 'Blaze', 'Echo'];
 
@@ -74,7 +73,7 @@ export function Crew() {
           <div className="col" style={{ gap: 6 }}>
             {[
               '10 new words',
-              'Listen to the story, then retell it',
+              'Read the story, then retell it',
               'Win Galaxy Run',
               'Pitch your own planet in 15 seconds',
             ].map((t, i) => (
@@ -200,6 +199,3 @@ export function Crew() {
     </Stage>
   );
 }
-
-/** Keeps the launch sound with the stage that owns it. */
-export const launchSound = () => sfx.launch();
