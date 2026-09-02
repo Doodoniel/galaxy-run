@@ -688,6 +688,8 @@ input {
   display: grid;
   gap: calc(var(--u) * 0.8);
   width: min(880px, 100%);
+  /* Centred in whatever holds it — options sit under the picture, not beside it. */
+  margin-inline: auto;
 }
 
 .opts--2 {

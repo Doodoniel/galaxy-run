@@ -101,48 +101,40 @@ export function SpeedRound() {
         </div>
       )}
 
+      {/* One centred column: clock, picture, answers — all on the same axis,
+          so nothing sits off to one side on a projector. */}
       {phase === 'run' && current && (
-        <div
-          className="split"
-          style={{
-            gridTemplateColumns: 'auto minmax(300px, 1fr)',
-            gap: 'calc(var(--u)*2)',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: '100%',
-          }}
-        >
-          <div className="center" style={{ gap: 'calc(var(--u)*.6)' }}>
-            <CountdownRing seconds={60} running runKey={runKey} onDone={stop} size={110} />
-            <span className="pill">
-              <Star size={13} /> {score}
+        <div className="center" style={{ width: '100%' }}>
+          <div className="row" style={{ justifyContent: 'center', gap: 'calc(var(--u)*1.4)' }}>
+            <CountdownRing seconds={60} running runKey={runKey} onDone={stop} size={92} />
+            <span className="pill" style={{ fontSize: 'clamp(14px, 2.2vh, 20px)' }}>
+              <Star size={15} /> {score}
             </span>
           </div>
 
-          <div className="col" style={{ minWidth: 0 }}>
-            <div
-              key={at}
-              className="pop"
-              style={{
-                display: 'grid',
-                placeItems: 'center',
-                borderRadius: 'var(--r-lg)',
-                background:
-                  flash === 'ok' ? 'rgba(63,191,90,.2)' : flash === 'no' ? 'rgba(244,68,46,.2)' : 'rgba(255,255,255,.05)',
-                transition: 'background .15s',
-                padding: 'calc(var(--u)*.8)',
-              }}
-            >
-              <WordArt word={current.word} size="min(200px, 26vh)" float={false} />
-            </div>
+          <div
+            key={at}
+            className="pop"
+            style={{
+              display: 'grid',
+              placeItems: 'center',
+              width: 'min(880px, 100%)',
+              borderRadius: 'var(--r-lg)',
+              background:
+                flash === 'ok' ? 'rgba(63,191,90,.2)' : flash === 'no' ? 'rgba(244,68,46,.2)' : 'rgba(255,255,255,.05)',
+              transition: 'background .15s',
+              padding: 'calc(var(--u)*.8)',
+            }}
+          >
+            <WordArt word={current.word} size="min(200px, 24vh)" float={false} />
+          </div>
 
-            <div className="opts opts--2">
-              {current.options.map((o) => (
-                <button key={o.id} className="opt" style={{ justifyContent: 'center' }} onClick={() => answer(o)}>
-                  {o.word}
-                </button>
-              ))}
-            </div>
+          <div className="opts opts--2">
+            {current.options.map((o) => (
+              <button key={o.id} className="opt" style={{ justifyContent: 'center' }} onClick={() => answer(o)}>
+                {o.word}
+              </button>
+            ))}
           </div>
         </div>
       )}
