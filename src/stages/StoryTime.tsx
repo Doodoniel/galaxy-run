@@ -77,9 +77,8 @@ function Read({ onDone }: { onDone: () => void }) {
           buttons, however short the screen is. */}
       <div
         key={i}
-        className="pop"
+        className="split pop"
         style={{
-          display: 'grid',
           gridTemplateColumns: 'auto minmax(300px, 620px)',
           gap: 'calc(var(--u) * 2.4)',
           alignItems: 'center',
@@ -160,7 +159,7 @@ function Retell({ onBack }: { onBack: () => void }) {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(6, 1fr)',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
             gap: 'calc(var(--u)*.9)',
             width: 'min(1100px, 100%)',
           }}
@@ -169,13 +168,7 @@ function Retell({ onBack }: { onBack: () => void }) {
             <div
               key={img}
               className="tile-card"
-              style={{
-                display: 'grid',
-                placeItems: 'center',
-                padding: 'calc(var(--u)*.7)',
-                aspectRatio: '3/4',
-                maxHeight: '46vh',
-              }}
+              style={{ display: 'grid', placeItems: 'center', padding: 'calc(var(--u)*1.1) calc(var(--u)*.7)' }}
             >
               <span
                 style={{
@@ -189,7 +182,7 @@ function Retell({ onBack }: { onBack: () => void }) {
               >
                 {n + 1}
               </span>
-              <WordArt word={wordById(img)} size="min(130px, 16vh)" float={false} />
+              <WordArt word={wordById(img)} size="min(155px, 19vh)" float={false} />
             </div>
           ))}
         </div>

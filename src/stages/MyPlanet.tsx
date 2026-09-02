@@ -76,8 +76,8 @@ export function MyPlanet() {
       <StarBurst fire={burst} />
 
       <div
+        className="split"
         style={{
-          display: 'grid',
           gridTemplateColumns: 'auto minmax(320px, 1fr)',
           gap: 'calc(var(--u)*2)',
           alignItems: 'center',

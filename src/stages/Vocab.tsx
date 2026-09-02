@@ -92,7 +92,7 @@ function Meanings({ onDone }: { onDone: (right: number) => void }) {
             >
               <span className="opt__key">{String.fromCharCode(65 + n)}</span>
               <span style={{ flex: 1 }}>{o.word}</span>
-              {picked && o.id === word.id && <WordArt word={o} size={38} float={false} />}
+              {picked && o.id === word.id && <WordArt word={o} size="min(58px, 7vh)" float={false} />}
             </button>
           ))}
         </div>

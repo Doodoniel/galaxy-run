@@ -92,8 +92,8 @@ export function WordCards() {
       }
     >
       <div
+        className="split"
         style={{
-          display: 'grid',
           gridTemplateColumns: 'auto minmax(280px, 1fr)',
           gap: 'calc(var(--u) * 2)',
           alignItems: 'center',

@@ -249,7 +249,7 @@ export function MemoryCore({ onClose }: { onClose: () => void }) {
                   onClick={() => choose(o)}
                   style={{ justifyContent: 'center' }}
                 >
-                  {current.drill === 'word2pic' ? <WordArt word={o} size="min(96px, 13vh)" float={false} /> : o.word}
+                  {current.drill === 'word2pic' ? <WordArt word={o} size="min(120px, 16vh)" float={false} /> : o.word}
                 </button>
               ))}
             </div>

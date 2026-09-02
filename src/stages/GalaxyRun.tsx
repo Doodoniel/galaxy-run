@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   BOARD,
   METEOR_CARDS,
@@ -54,6 +54,31 @@ const TILE_ICON: Record<TileKind, string> = {
   finish: '🏫',
 };
 
+/**
+ * The board has to fit the box it is given in BOTH directions. CSS cannot do
+ * that on its own here: the tiles are square, so their automatic minimum size
+ * grows with the row height and pushes the last column off the screen. So the
+ * size is measured and worked out once per resize.
+ */
+function useBoardFit(cols: number, rows: number) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [box, setBox] = useState({ w: 0, h: 0 });
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => {
+      const r = entry.contentRect;
+      setBox({ w: r.width, h: r.height });
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const width = Math.min(1150, box.w, box.h * (cols / rows));
+  return { ref, width: width > 0 ? width : undefined, height: width > 0 ? (width * rows) / cols : undefined };
+}
+
 function useColumns() {
   const [cols, setCols] = useState(() => (window.innerWidth < 820 ? 4 : 7));
   useEffect(() => {
@@ -76,6 +101,7 @@ export function GalaxyRun() {
 
   const cols = useColumns();
   const rows = Math.ceil(BOARD.length / cols);
+  const fit = useBoardFit(cols, rows);
   const pilots = state.pilots;
   const turn = state.turn % pilots.length;
   const pilot = pilots[turn];
@@ -296,16 +322,14 @@ export function GalaxyRun() {
 
       {/* The board is sized by the height it is given, so the whole route is
           always on screen — a projector is short, not narrow. */}
-      <div style={{ height: '100%', width: '100%', display: 'grid', placeItems: 'center' }}>
+      <div ref={fit.ref} style={{ height: '100%', width: '100%', display: 'grid', placeItems: 'center' }}>
         <div
           className="board"
           style={{
             gridTemplateColumns: `repeat(${cols}, 1fr)`,
             gridTemplateRows: `repeat(${rows}, 1fr)`,
-            aspectRatio: `${cols} / ${rows}`,
-            height: '100%',
-            width: 'auto',
-            maxWidth: 'min(1150px, 100%)',
+            width: fit.width,
+            height: fit.height,
           }}
         >
         {positions.map((t) => {
@@ -561,7 +585,7 @@ function WordTile({
           width: 'clamp(140px, 22vh, 200px)',
         }}
       >
-        <WordArt word={word} size="min(110px, 15vh)" float={false} />
+        <WordArt word={word} size="min(150px, 20vh)" float={false} />
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(17px, 2.6vh, 24px)', color: '#1a0a33' }}>
           {word.word}
         </div>
@@ -645,9 +669,9 @@ function MiraTile({
         <img
           src={`${import.meta.env.BASE_URL}art/owl.webp`}
           alt="Mira the owl"
-          width={54}
+          width={76}
           className="word-art"
-          style={{ flex: 'none', width: 54, height: 54 }}
+          style={{ flex: 'none', width: 76, height: 76 }}
         />
         <h3 className="q q--sm" style={{ flex: 1, textAlign: 'left' }}>
           {card.q}

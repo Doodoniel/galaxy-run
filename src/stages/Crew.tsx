@@ -47,8 +47,8 @@ export function Crew() {
       footer={<NextButton label={ready ? 'Launch' : 'Callsigns first'} disabled={!ready} />}
     >
       <div
+        className="split"
         style={{
-          display: 'grid',
           gridTemplateColumns: 'minmax(240px, 0.85fr) 1.15fr',
           gap: 'calc(var(--u) * 1.6)',
           width: 'min(1180px, 100%)',
@@ -64,7 +64,7 @@ export function Crew() {
               src={`${import.meta.env.BASE_URL}art/chameleon.webp`}
               alt="Richie the chameleon"
               className="word-art float"
-              style={{ width: 'clamp(60px, 11vh, 110px)', height: 'auto', flex: 'none' }}
+              style={{ width: 'clamp(76px, 14vh, 140px)', height: 'auto', flex: 'none' }}
             />
             <p style={{ margin: 0, fontSize: 'clamp(13px, 1.95vh, 18px)' }}>
               Richie the chameleon has one dream: to speak English, travel and make friends. Today you fly with him.

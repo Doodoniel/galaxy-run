@@ -122,8 +122,8 @@ export function SpeedRound() {
 
       {phase === 'run' && current && (
         <div
+          className="split"
           style={{
-            display: 'grid',
             gridTemplateColumns: 'auto minmax(300px, 1fr)',
             gap: 'calc(var(--u)*2)',
             alignItems: 'center',

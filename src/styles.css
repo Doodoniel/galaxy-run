@@ -795,12 +795,25 @@ input {
 }
 
 .word-art {
-  width: 100%;
-  height: 100%;
+  max-width: 100%;
   object-fit: contain;
   filter: drop-shadow(0 10px 26px rgba(0, 0, 0, 0.55));
   user-select: none;
   -webkit-user-drag: none;
+}
+
+/**
+ * Fills the square its wrapper defines and letterboxes inside it, so a picture
+ * is never cropped and never larger than its slot. Absolute rather than
+ * `height: 100%`, because a percentage height silently falls back to `auto`
+ * whenever the wrapper's own max-height cannot be resolved — which is exactly
+ * how a portrait illustration ends up taller than the box it was given.
+ */
+.art-fit {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .syllables {
@@ -873,7 +886,6 @@ input {
 }
 
 .tile {
-  aspect-ratio: 1 / 1;
   border-radius: var(--r-md);
   border: 1px solid rgba(255, 255, 255, 0.14);
   position: relative;
@@ -881,7 +893,10 @@ input {
   place-items: center;
   padding: 3px;
   transition: box-shadow 0.25s, border-color 0.25s;
+  /* The board is sized in JS; a tile must never set its own floor. */
+  min-width: 0;
   min-height: 0;
+  overflow: hidden;
 }
 
 .tile__n {
@@ -1014,7 +1029,27 @@ input {
 
 /* -------------------------------------------------------------- narrow */
 
+/* A screen built as picture-beside-words. Inline styles set the wide layout;
+   below the breakpoint it folds into a single column. */
+.split {
+  display: grid;
+  width: 100%;
+}
+
 @media (max-width: 860px) {
+  .split {
+    grid-template-columns: minmax(0, 1fr) !important;
+    justify-items: center;
+    align-content: start;
+  }
+
+  /* The no-scroll rule is for the projector. On a phone, let it scroll rather
+     than crush the content. */
+  .stage__body {
+    overflow-y: auto;
+    place-items: start center;
+  }
+
   .hide-sm {
     display: none;
   }

@@ -38,16 +38,21 @@ export function WordArt({
       style={{
         width: dim,
         height: dim,
+        position: 'relative',
         display: 'grid',
         placeItems: 'center',
+        // Never bigger than the slot it was given…
         maxWidth: '100%',
         maxHeight: '100%',
+        // …and always the first thing to give way, so an illustration can
+        // never end up sitting on top of a button.
+        minWidth: 0,
         minHeight: 0,
-        flex: 'none',
+        flex: '0 1 auto',
       }}
     >
       <img
-        className="word-art"
+        className="word-art art-fit"
         src={`${import.meta.env.BASE_URL}art/${word.image}.webp`}
         alt={word.word}
         decoding="async"

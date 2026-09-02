@@ -59,7 +59,7 @@ export function Report() {
         }}
       >
         {/* ------------------------------------------------------ podium */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'calc(var(--u)*1.1)' }}>
+        <div className="split" style={{ gridTemplateColumns: 'repeat(3, 1fr)', gap: 'calc(var(--u)*1.1)' }}>
           <Headline accent="var(--cyan)" label="Race winner" big={winner?.callsign ?? '—'} sub="first to the New School" icon="🏫" />
           <Headline accent="var(--yellow)" label="MVP" big={best?.callsign ?? '—'} sub={`${best?.stars ?? 0} stars`} icon="⭐" />
           <Headline accent="var(--green)" label="Crew record" big={`${record} / 10`} sub="words in 60 seconds" icon="⏱" />
@@ -67,8 +67,8 @@ export function Report() {
 
         {/* ------------------------------------------------------ pilots */}
         <div
+          className="split"
           style={{
-            display: 'grid',
             gridTemplateColumns: `repeat(${Math.min(board.length, 3)}, 1fr)`,
             gap: 'calc(var(--u)*1.1)',
             minHeight: 0,
@@ -86,8 +86,8 @@ export function Report() {
                   alignItems: 'flex-start',
                 }}>
                 <div style={{ flex: 'none', display: 'grid', placeItems: 'center', gap: 4 }}>
-                  <Rocket colour={p.colour} size={30} />
-                  <Planet look={p.planet} size={62} glow={false} />
+                  <Rocket colour={p.colour} size={34} />
+                  <Planet look={p.planet} size={78} glow={false} />
                 </div>
                 <div style={{ minWidth: 0 }}>
                   <b style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(15px, 2.3vh, 21px)' }}>{p.callsign}</b>
@@ -110,7 +110,7 @@ export function Report() {
         </div>
 
         {/* ------------------------------------- crew scores + homework */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: 'calc(var(--u)*1.1)' }}>
+        <div className="split" style={{ gridTemplateColumns: '1.3fr 1fr', gap: 'calc(var(--u)*1.1)' }}>
           <div className="tile-card">
             <span className="card-label">How the crew scored</span>
             <div className="row" style={{ gap: 6, marginTop: 5 }}>
