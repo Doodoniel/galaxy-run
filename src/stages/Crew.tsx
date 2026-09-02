@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { OBJECTIVES } from '../data/lesson';
 import { makePilot, PILOT_COLOURS, useGame, type Mode } from '../state/game';
 import { Modal, Rocket, tap } from '../components/ui';
+import { artUrl } from '../lib/art';
 import { NextButton, Stage } from '../components/Shell';
 
 const IDEAS = ['Falcon', 'Nova', 'Comet', 'Orbit', 'Blaze', 'Echo'];
@@ -61,7 +62,7 @@ export function Crew() {
           <span className="card-label">Today’s flight</span>
           <div className="row" style={{ flexWrap: 'nowrap', gap: 'calc(var(--u)*1)' }}>
             <img
-              src={`${import.meta.env.BASE_URL}art/chameleon.webp`}
+              src={artUrl('chameleon')}
               alt="Richie the chameleon"
               className="word-art float"
               style={{ width: 'clamp(76px, 14vh, 140px)', height: 'auto', flex: 'none' }}

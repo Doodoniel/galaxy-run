@@ -30,6 +30,7 @@ import {
 } from '../components/ui';
 import { CHECK_METEORS } from './Check';
 import { sfx, speak } from '../lib/audio';
+import { artUrl } from '../lib/art';
 
 /** The meteors the practice phase did not use. */
 const GAME_METEORS = METEOR_CARDS.filter((c) => !CHECK_METEORS.some((s) => s.id === c.id));
@@ -667,7 +668,7 @@ function MiraTile({
     <div className="col">
       <div className="row" style={{ flexWrap: 'nowrap' }}>
         <img
-          src={`${import.meta.env.BASE_URL}art/owl.webp`}
+          src={artUrl('owl')}
           alt="Mira the owl"
           width={76}
           className="word-art"

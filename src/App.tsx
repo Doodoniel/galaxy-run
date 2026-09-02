@@ -19,6 +19,7 @@ import { MyPlanet } from './stages/MyPlanet';
 import { Report } from './stages/Report';
 import { MemoryCore } from './stages/MemoryCore';
 import { setMuted, sfx, stopSpeaking } from './lib/audio';
+import { artUrl } from './lib/art';
 import { tap } from './components/ui';
 
 export default function App() {
@@ -46,7 +47,7 @@ function Mission() {
   useEffect(() => {
     WORDS.forEach((w) => {
       const img = new Image();
-      img.src = `${import.meta.env.BASE_URL}art/${w.image}.webp`;
+      img.src = artUrl(w.image);
     });
   }, []);
 

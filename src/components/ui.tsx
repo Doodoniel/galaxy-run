@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import type { Word } from '../data/content';
 import { sfx, speak } from '../lib/audio';
+import { artUrl } from '../lib/art';
 
 /* ------------------------------------------------------------------ stars */
 
@@ -53,7 +54,7 @@ export function WordArt({
     >
       <img
         className="word-art art-fit"
-        src={`${import.meta.env.BASE_URL}art/${word.image}.webp`}
+        src={artUrl(word.image)}
         alt={word.word}
         decoding="async"
       />
