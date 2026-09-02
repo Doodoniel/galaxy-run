@@ -349,15 +349,100 @@ input {
   border-color: rgba(255, 255, 255, 0.3);
 }
 
-.actbar__aim {
+/* The crew, on screen in every activity: who is answering, and the score. */
+.actbar__crew {
   flex: 1;
   min-width: 0;
-  font-size: clamp(11px, 1.4vh, 14px);
-  color: var(--ink-faint);
+  display: flex;
+  justify-content: flex-end;
+  gap: 5px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.actbar__crew::-webkit-scrollbar {
+  display: none;
+}
+
+.crewchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-align: right;
+  padding: 2px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--card-line);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--ink-faint);
+  font-size: clamp(10px, 1.35vh, 13px);
+  font-weight: 700;
+  transition: 0.16s;
+}
+
+.crewchip:hover {
+  color: var(--ink);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.crewchip[data-active='true'] {
+  color: #fff;
+  border-color: var(--pilot);
+  background: color-mix(in srgb, var(--pilot) 26%, transparent);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--pilot) 45%, transparent);
+}
+
+.crewchip__acc {
+  opacity: 0.75;
+}
+
+.crewchip i {
+  font-style: normal;
+  background: var(--yellow);
+  color: #3a1e00;
+  border-radius: 999px;
+  padding: 0 5px;
+}
+
+/* Whose turn it is, said loudly enough for the back row. */
+.turnbadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 6px 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--pilot);
+  background: color-mix(in srgb, var(--pilot) 22%, transparent);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--pilot) 40%, transparent);
+  font-family: var(--font-display);
+  font-size: clamp(13px, 2vh, 19px);
+  color: #fff;
+  white-space: nowrap;
+}
+
+.turnbadge__label {
+  font-family: var(--font-body);
+  font-size: 0.72em;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.turnbadge__skip {
+  border: none;
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--ink-soft);
+  border-radius: 999px;
+  width: 1.7em;
+  height: 1.7em;
+  display: grid;
+  place-items: center;
+  font-size: 0.8em;
+  transition: 0.16s;
+}
+
+.turnbadge__skip:hover {
+  background: rgba(255, 255, 255, 0.26);
+  color: #fff;
 }
 
 .actbar__min {
@@ -1142,6 +1227,177 @@ input {
   }
 }
 
+/* --------------------------------------------------------- certificate */
+
+/* Black on white on purpose: this one is meant for a school printer. */
+.certificate {
+  background: #fff;
+  color: #1b0f2e;
+  border: 2px solid #cfc4e4;
+  border-radius: 16px;
+  padding: clamp(16px, 3vh, 30px);
+  font-family: var(--font-body);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.certificate + .certificate {
+  margin-top: 18px;
+}
+
+.certificate__head {
+  text-align: center;
+  border-bottom: 2px solid #e6e0f2;
+  padding-bottom: 10px;
+}
+
+.certificate__brand {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #7b4fd0;
+}
+
+.certificate__head h2 {
+  font-size: clamp(22px, 3.4vh, 32px);
+  color: #1b0f2e;
+  margin-top: 2px;
+}
+
+.certificate__hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.certificate__rocket {
+  flex: none;
+}
+
+.certificate__name {
+  font-family: var(--font-display);
+  font-size: clamp(26px, 4.4vh, 40px);
+  line-height: 1.05;
+}
+
+.certificate__date {
+  color: #6b5b86;
+  font-size: 14px;
+}
+
+.certificate__planet {
+  flex: none;
+  text-align: center;
+  font-size: 13px;
+  color: #6b5b86;
+}
+
+.certificate__planet span {
+  display: block;
+  font-weight: 700;
+  color: #1b0f2e;
+}
+
+.certificate__stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.certificate__stat {
+  border: 1px solid #e0d8f0;
+  border-radius: 12px;
+  padding: 8px 10px;
+  text-align: center;
+}
+
+.certificate__stat b {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-family: var(--font-display);
+  font-size: clamp(17px, 2.6vh, 24px);
+}
+
+.certificate__stat span {
+  display: block;
+  font-size: 11px;
+  color: #6b5b86;
+}
+
+.certificate__block h3 {
+  font-family: var(--font-display);
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #7b4fd0;
+  margin-bottom: 6px;
+}
+
+.certificate__block ul {
+  margin: 0;
+  padding-left: 20px;
+  line-height: 1.65;
+}
+
+.certificate__block em {
+  color: #6b5b86;
+}
+
+.certificate__clean {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.certificate__skills {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.certificate__skills div {
+  border: 1px solid #e0d8f0;
+  border-radius: 10px;
+  padding: 6px 10px;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.certificate__words {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.certificate__words span {
+  border: 1px solid #ded5f0;
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 13px;
+}
+
+.certificate__words span[data-missed='true'] {
+  border-color: #d8452e;
+  color: #b3311d;
+  font-weight: 800;
+}
+
+.certificate__foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 2px solid #e6e0f2;
+  padding-top: 10px;
+  font-size: 13px;
+  color: #6b5b86;
+}
+
 /* ------------------------------------------------------------- printing */
 
 @media print {
@@ -1151,7 +1407,6 @@ input {
     height: auto;
     overflow: visible;
     background: #fff;
-    color: #16091f;
   }
 
   .starfield,
@@ -1159,23 +1414,37 @@ input {
   .backdrop,
   .topbar,
   .actbar,
-  .stage__foot,
-  .btn,
-  .icon-btn,
+  .stage,
   .no-print {
     display: none !important;
   }
 
-  .panel,
-  .tile-card {
-    background: #fff !important;
-    border: 1px solid #cfc6e0 !important;
-    backdrop-filter: none !important;
-    break-inside: avoid;
+  /* The certificates live inside a modal; printing lifts them out of it. */
+  .scrim {
+    position: static;
+    inset: auto;
+    background: none;
+    backdrop-filter: none;
+    padding: 0;
+    display: block;
   }
 
-  .report,
-  .report * {
-    color: #16091f !important;
+  .modal {
+    width: auto !important;
+    max-height: none;
+    overflow: visible;
+    background: none;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .certificate {
+    break-after: page;
+    border-width: 1px;
+  }
+
+  .certificate:last-of-type {
+    break-after: auto;
   }
 }

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { WORDS, type Word } from '../data/content';
 import { useGame } from '../state/game';
 import { NextButton, Stage } from '../components/Shell';
-import { CountdownRing, PilotChip, Star, StarBurst, WordArt, shuffle, tap } from '../components/ui';
+import { CountdownRing, Star, StarBurst, WordArt, shuffle, tap } from '../components/ui';
 import { sfx, speak } from '../lib/audio';
 
 interface Question {
@@ -27,8 +27,8 @@ function buildQueue(): Question[] {
  * mission, which is what turns vocabulary into a serial.
  */
 export function SpeedRound() {
-  const { state, update, finish } = useGame();
-  const [pilot, setPilot] = useState(0);
+  const { state, update, finish, flagWord, passTurn } = useGame();
+  const pilot = state.turn % Math.max(1, state.pilots.length);
   const [phase, setPhase] = useState<'ready' | 'run' | 'over'>('ready');
   const [queue, setQueue] = useState<Question[]>([]);
   const [at, setAt] = useState(0);
@@ -62,6 +62,7 @@ export function SpeedRound() {
       sfx.wrong();
       setMisses((m) => m + 1);
       setFlash('no');
+      flagWord(current.word.id);
       speak(current.word.word);
     }
     window.setTimeout(() => setFlash(null), 160);
@@ -82,27 +83,7 @@ export function SpeedRound() {
     <Stage
       title="Speed round"
       step={phase === 'run' ? `${score} correct` : `record ${record} / 10`}
-      aside={
-        <div className="row" style={{ gap: 6 }}>
-          {state.pilots.map((pp, i) => (
-            <PilotChip
-              key={pp.id}
-              callsign={pp.callsign}
-              colour={pp.colour}
-              stars={pp.best}
-              active={i === pilot}
-              onClick={
-                phase === 'run'
-                  ? undefined
-                  : tap(() => {
-                      setPilot(i);
-                      setPhase('ready');
-                    })
-              }
-            />
-          ))}
-        </div>
-      }
+      turn
       footer={phase === 'over' ? <NextButton label="To Galaxy Run" /> : undefined}
     >
       <StarBurst fire={burst} />
@@ -184,15 +165,15 @@ export function SpeedRound() {
             <button className="btn" onClick={start}>
               Beat it — run again
             </button>
-            {pilot + 1 < state.pilots.length && (
+            {state.pilots.length > 1 && (
               <button
                 className="btn btn--ghost"
                 onClick={tap(() => {
-                  setPilot(pilot + 1);
+                  passTurn();
                   setPhase('ready');
                 })}
               >
-                Next pilot: {state.pilots[pilot + 1].callsign} →
+                Next pilot →
               </button>
             )}
           </div>

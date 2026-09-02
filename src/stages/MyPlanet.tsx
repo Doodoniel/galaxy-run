@@ -4,7 +4,7 @@ import { PITCH_FRAME, type PlanetLook } from '../data/lesson';
 import { useGame, type PlanetSheet } from '../state/game';
 import { NextButton, Stage } from '../components/Shell';
 import { Planet } from '../components/Planet';
-import { CountdownRing, PilotChip, Star, StarBurst, tap } from '../components/ui';
+import { CountdownRing, Star, StarBurst, tap } from '../components/ui';
 import { sfx } from '../lib/audio';
 
 const TYPES: PlanetLook['type'][] = ['rocky', 'banded', 'ringed', 'icy', 'lava'];
@@ -15,8 +15,8 @@ const TYPES: PlanetLook['type'][] = ['rocky', 'banded', 'ringed', 'icy', 'lava']
  * says it out loud, which is the whole point of the task.
  */
 export function MyPlanet() {
-  const { state, update, finish } = useGame();
-  const [who, setWho] = useState(0);
+  const { state, update, finish, passTurn } = useGame();
+  const who = state.turn % Math.max(1, state.pilots.length);
   const [pitching, setPitching] = useState(false);
   const [burst, setBurst] = useState(0);
 
@@ -40,29 +40,14 @@ export function MyPlanet() {
     <Stage
       title="My planet"
       step={`${state.pilots.filter((p) => p.planet.pitched).length} / ${state.pilots.length} pitched`}
-      aside={
-        <div className="row" style={{ gap: 6 }}>
-          {state.pilots.map((p, i) => (
-            <PilotChip
-              key={p.id}
-              callsign={p.callsign}
-              colour={p.colour}
-              active={i === who}
-              onClick={tap(() => {
-                setWho(i);
-                setPitching(false);
-              })}
-            />
-          ))}
-        </div>
-      }
+      turn
       footer={
         <div className="btn-row">
-          {who + 1 < state.pilots.length && (
+          {state.pilots.length > 1 && (
             <button
               className="btn btn--ghost"
               onClick={tap(() => {
-                setWho(who + 1);
+                passTurn();
                 setPitching(false);
               })}
             >

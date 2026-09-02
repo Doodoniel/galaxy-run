@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { activityOf } from '../data/lesson';
 import { useGame } from '../state/game';
+import { Rocket, tap } from './ui';
 
 /**
  * Every activity is one screen. The frame is fixed: title row, a body that
@@ -11,6 +12,7 @@ import { useGame } from '../state/game';
 export function Stage({
   title,
   step,
+  turn,
   aside,
   children,
   footer,
@@ -19,6 +21,8 @@ export function Stage({
   title: string;
   /** Small progress marker: "3 / 10". */
   step?: string;
+  /** Show whose turn it is — set on every activity that takes turns. */
+  turn?: boolean;
   /** Controls that belong to the title row. */
   aside?: ReactNode;
   children: ReactNode;
@@ -34,6 +38,7 @@ export function Stage({
       <header className="stage__top">
         <h1>{title}</h1>
         {step && <span className="stage__step">{step}</span>}
+        {turn && <TurnBadge />}
         <span className="stage__gap" />
         {aside}
       </header>
@@ -46,6 +51,29 @@ export function Stage({
         {footer}
       </footer>
     </section>
+  );
+}
+
+/**
+ * Whose turn it is. The same queue runs through the whole mission, so the
+ * quiet pilot at the back gets named out loud as often as the loud one — and
+ * the teacher can hand the turn on when somebody is stuck.
+ */
+export function TurnBadge() {
+  const { state, pilot, passTurn } = useGame();
+  if (!pilot) return null;
+  const crew = state.pilots.length > 1;
+  return (
+    <span className="turnbadge" style={{ ['--pilot' as string]: pilot.colour }}>
+      <Rocket colour={pilot.colour} size={19} />
+      <b>{pilot.callsign || '—'}</b>
+      {crew && <span className="turnbadge__label">answers</span>}
+      {crew && (
+        <button className="turnbadge__skip" onClick={tap(passTurn)} title="Pass the turn on" aria-label="Pass the turn">
+          ⏭
+        </button>
+      )}
+    </span>
   );
 }
 

@@ -146,7 +146,8 @@ function Retell({ onBack }: { onBack: () => void }) {
   return (
     <Stage
       title="Retell the story"
-      hint="“Six pictures, no words. Tell me the story back. Anybody can start.”"
+      turn
+      hint="“Six pictures, no words. Tell me the story back.”"
       aside={
         <button className="btn btn--ghost btn--sm" onClick={tap(onBack)}>
           ← Read it again

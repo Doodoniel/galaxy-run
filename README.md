@@ -67,10 +67,43 @@ Both windows run the same mission and stay in step through the browser's own sto
 jump a phase or flip the mode in your window and the shared one follows within a moment. No server involved,
 and it only works between windows of the same browser on the same computer.
 
+## Whose turn it is
+
+One queue runs through the whole mission, not just the board. The pilot on turn is named in the title row of
+every activity, and the crew strip in the bar shows everyone with their score, so the quiet pilot at the back
+gets asked as often as the loud one. Two levers when that gets in the way:
+
+- **⏭ next to the name** hands the turn on — for a pilot who is stuck, or out of the room.
+- **Click any pilot in the crew strip** to put them on turn, when you want to ask someone in particular.
+
+## Two scores, kept apart
+
+| | What it measures | Who decides |
+| --- | --- | --- |
+| **⭐ Stars** | Speaking — WORD and STAR tiles, Mira from memory, the story retell, the planet pitch | You, with ⭐ / no star |
+| **🎯 Accuracy** | The auto-checked questions the pilot was actually asked | The app |
+
+They are deliberately not one number. Every correct true/false would otherwise be worth as much as fifteen
+seconds of unbroken English, and the MVP badge would go to whoever clicks fastest rather than whoever talks
+most — the wrong prize for a speaking lesson. Accuracy and fluency are also often *different children*, and
+seeing which is which is the useful part.
+
+Accuracy is broken down into **Vocabulary**, **Story** and **Grammar**, and every wrong answer adds the word
+or the grammar rule to that pilot's personal review list.
+
+## Certificates
+
+The mission report ends with **🎖 Certificates** — one printable page per pilot: callsign, their planet,
+stars, place, speed record, accuracy per skill, and a short specific list of *what to practise before Mission
+02* built from what they actually got wrong. It prints black-on-white, one pilot per page.
+
+It claims nothing it cannot back up. With a crew taking turns each pilot only answers a handful of items, so
+the certificate reports what happened rather than ticking off words nobody tested.
+
 ## How grading works
 
 Anything checkable is checked automatically: vocabulary, gap-fill, true/false, meteor corrections, Mira's
-story questions, and every Memory Core drill. The scores land on the mission report.
+story questions, and every Memory Core drill.
 
 Anything spoken — WORD tiles, STAR tiles, the story retell, the planet pitch — runs a timer with on-screen
 support phrases and then leaves the verdict to the teacher: **⭐ 1 star** or **no star**. No crew voting, no

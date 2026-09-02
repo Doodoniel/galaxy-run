@@ -13,13 +13,12 @@ import {
   type TileKind,
   type Word,
 } from '../data/content';
-import { useGame, type Pilot } from '../state/game';
+import { useGame, type AnswerDetail, type Pilot } from '../state/game';
 import { NextButton, Stage } from '../components/Shell';
 import { MeteorTask } from '../components/MeteorTask';
 import {
   CountdownRing,
   Modal,
-  PilotChip,
   Rocket,
   Star,
   StarBurst,
@@ -90,7 +89,7 @@ function useColumns() {
 }
 
 export function GalaxyRun() {
-  const { state, update } = useGame();
+  const { state, update, record } = useGame();
   const [die, setDie] = useState<number | null>(null);
   const [rolling, setRolling] = useState(false);
   const [task, setTask] = useState<Task | null>(null);
@@ -254,34 +253,12 @@ export function GalaxyRun() {
   return (
     <Stage
       title="Galaxy Run"
-      step={raceOver ? 'race over' : `${pilot.callsign}’s turn`}
+      step={raceOver ? 'race over' : undefined}
+      turn={!raceOver}
       aside={
-        <div className="row" style={{ gap: 6 }}>
-          {pilots.map((p, i) => (
-            <span key={p.id} style={{ position: 'relative' }}>
-              <PilotChip callsign={p.callsign} colour={p.colour} stars={p.stars} active={i === turn && !raceOver} />
-              {p.place && (
-                <b
-                  style={{
-                    position: 'absolute',
-                    top: -7,
-                    right: -5,
-                    background: 'var(--yellow)',
-                    color: '#3a1e00',
-                    borderRadius: 999,
-                    fontSize: 10,
-                    padding: '0 5px',
-                  }}
-                >
-                  #{p.place}
-                </b>
-              )}
-            </span>
-          ))}
-          <button className="btn btn--ghost btn--sm" onClick={tap(() => setRules(true))}>
-            📖 Rules
-          </button>
-        </div>
+        <button className="btn btn--ghost btn--sm" onClick={tap(() => setRules(true))}>
+          📖 Rules
+        </button>
       }
       hint={note ?? undefined}
       footer={
@@ -373,6 +350,7 @@ export function GalaxyRun() {
         pilot={pilot}
         hard={state.hard}
         onClose={() => setTask(null)}
+        onRecord={record}
         onSucceed={succeed}
         onFail={fail}
         onContinue={(delta) => {
@@ -426,6 +404,7 @@ function TaskModal({
   pilot,
   hard,
   onClose,
+  onRecord,
   onSucceed,
   onFail,
   onContinue,
@@ -434,6 +413,7 @@ function TaskModal({
   pilot: Pilot;
   hard: boolean;
   onClose: () => void;
+  onRecord: (correct: boolean, detail: AnswerDetail) => void;
   onSucceed: (line: string) => void;
   onFail: (line: string, penalty?: number) => void;
   onContinue: (delta: number) => void;
@@ -459,17 +439,28 @@ function TaskModal({
           <MeteorTask
             card={task.card}
             showRule={hard}
-            onSolved={() => onSucceed(`fixed “${task.card.tokens[task.card.wrong[0]]}” → “${task.card.fix}”`)}
+            onSolved={(clean) => {
+              onRecord(clean, { skill: 'grammar', rule: task.card.rule });
+              onSucceed(`fixed “${task.card.tokens[task.card.wrong[0]]}” → “${task.card.fix}”`);
+            }}
           />
           <div className="btn-row" style={{ marginTop: 'calc(var(--u)*1)' }}>
-            <button className="btn btn--ghost btn--sm" onClick={() => onFail('could not fix the meteor', 2)}>
+            <button
+              className="btn btn--ghost btn--sm"
+              onClick={() => {
+                onRecord(false, { skill: 'grammar', rule: task.card.rule });
+                onFail('could not fix the meteor', 2);
+              }}
+            >
               Give up — go back 2
             </button>
           </div>
         </>
       )}
 
-      {task.kind === 'mira' && <MiraTile card={task.card} onSucceed={onSucceed} onFail={onFail} />}
+      {task.kind === 'mira' && (
+        <MiraTile card={task.card} onRecord={onRecord} onSucceed={onSucceed} onFail={onFail} />
+      )}
       {task.kind === 'star' && <StarTile card={task.card} hard={hard} onSucceed={onSucceed} onFail={onFail} />}
 
       {task.kind === 'boost' && (
@@ -596,10 +587,12 @@ function WordTile({
 
 function MiraTile({
   card,
+  onRecord,
   onSucceed,
   onFail,
 }: {
   card: MiraCard;
+  onRecord: (correct: boolean, detail: AnswerDetail) => void;
   onSucceed: (line: string) => void;
   onFail: (line: string) => void;
 }) {
@@ -627,8 +620,11 @@ function MiraTile({
   }
 
   const choose = (o: string) => {
+    if (picked) return;
     setPicked(o);
-    if (o === card.a) {
+    const ok = o === card.a;
+    onRecord(ok, { skill: 'comprehension' });
+    if (ok) {
       sfx.right();
       window.setTimeout(() => onSucceed(`answered “${card.q}”`), 700);
     } else sfx.wrong();

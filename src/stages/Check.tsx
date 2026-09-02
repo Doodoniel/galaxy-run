@@ -32,6 +32,7 @@ export function Check() {
 /* ------------------------------------------------ round 1 · true/false */
 
 function TrueFalse({ onDone }: { onDone: (right: number) => void }) {
+  const { answer: answerTurn } = useGame();
   const [i, setI] = useState(0);
   const [given, setGiven] = useState<boolean | null>(null);
   const [marks, setMarks] = useState<(boolean | null)[]>(Array(TRUE_FALSE.length).fill(null));
@@ -47,12 +48,14 @@ function TrueFalse({ onDone }: { onDone: (right: number) => void }) {
     const correct = value === item.answer;
     correct ? sfx.right() : sfx.wrong();
     setMarks((m) => m.map((v, j) => (j === i ? correct : v)));
+    answerTurn(correct, { skill: 'comprehension' });
   };
 
   return (
     <Stage
       title="True or false?"
       step={`${i + 1} / ${TRUE_FALSE.length}`}
+      turn
       aside={<Dots marks={marks} at={i} />}
       footer={
         <button
@@ -109,7 +112,7 @@ function TrueFalse({ onDone }: { onDone: (right: number) => void }) {
 /* --------------------------------------------------- round 2 · meteors */
 
 function Meteors({ carried, onBack }: { carried: number; onBack: () => void }) {
-  const { finish } = useGame();
+  const { finish, answer: answerTurn } = useGame();
   const [i, setI] = useState(0);
   const [burst, setBurst] = useState(0);
   const [cleared, setCleared] = useState(0);
@@ -124,7 +127,8 @@ function Meteors({ carried, onBack }: { carried: number; onBack: () => void }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [done]);
 
-  const solved = () => {
+  const solved = (clean: boolean) => {
+    answerTurn(clean, { skill: 'grammar', rule: CHECK_METEORS[i].rule });
     setBurst((b) => b + 1);
     setCleared((c) => c + 1);
     window.setTimeout(() => {
@@ -136,6 +140,7 @@ function Meteors({ carried, onBack }: { carried: number; onBack: () => void }) {
     <Stage
       title="Meteor alert"
       step={`${Math.min(cleared + 1, CHECK_METEORS.length)} / ${CHECK_METEORS.length}`}
+      turn
       aside={
         <div className="row" style={{ gap: 8 }}>
           <Dots marks={CHECK_METEORS.map((_, n) => (n < cleared ? true : null))} at={i} />

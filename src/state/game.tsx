@@ -42,6 +42,26 @@ export interface PlanetSheet extends PlanetLook {
   pitched: boolean;
 }
 
+/**
+ * Two different things are worth knowing about a pilot, and mixing them into
+ * one number hides both:
+ *   - stars are the currency of SPEAKING, exactly as in the printed game;
+ *   - accuracy is what the auto-checked tasks measure.
+ * Accuracy and fluency are often different children.
+ */
+export type SkillId = 'vocabulary' | 'comprehension' | 'grammar';
+
+export interface Tally {
+  right: number;
+  wrong: number;
+}
+
+export const SKILLS: { id: SkillId; label: string; hint: string }[] = [
+  { id: 'vocabulary', label: 'Vocabulary', hint: 'the ten words and their meanings' },
+  { id: 'comprehension', label: 'Story', hint: 'true / false and Mira’s questions' },
+  { id: 'grammar', label: 'Grammar', hint: 'the meteor corrections' },
+];
+
 export interface Pilot {
   id: string;
   callsign: string;
@@ -56,6 +76,12 @@ export interface Pilot {
   best: number;
   /** Vocabulary mastery, 0…5 per word — drives the Memory Core queue. */
   mastery: Record<string, number>;
+  /** Right / wrong on the auto-checked tasks, per skill. */
+  skills: Record<SkillId, Tally>;
+  /** Words this pilot got wrong at least once — their review list. */
+  missedWords: WordId[];
+  /** Grammar rules they tripped on, taken from the meteor cards. */
+  missedRules: string[];
   planet: PlanetSheet;
 }
 
@@ -108,11 +134,18 @@ export const makePilot = (i: number, callsign = ''): Pilot => ({
   place: null,
   best: 0,
   mastery: Object.fromEntries(WORDS.map((w) => [w.id, 0])),
+  skills: {
+    vocabulary: { right: 0, wrong: 0 },
+    comprehension: { right: 0, wrong: 0 },
+    grammar: { right: 0, wrong: 0 },
+  },
+  missedWords: [],
+  missedRules: [],
   planet: emptyPlanet(),
 });
 
 const initialState = (): MissionState => ({
-  v: 2,
+  v: 3,
   mode: 'class',
   activity: 'crew',
   done: [],
@@ -136,9 +169,9 @@ function load(): MissionState {
     const raw = localStorage.getItem(KEY);
     if (!raw) return initialState();
     const saved = JSON.parse(raw) as MissionState;
-    // Older saves belong to the pre-PPP structure: start clean rather than
-    // half-restoring a mission whose stages no longer exist.
-    if (saved?.v !== 2) return initialState();
+    // An older save belongs to a mission with a different shape: start clean
+    // rather than half-restoring it.
+    if (saved?.v !== 3) return initialState();
     return { ...initialState(), ...saved };
   } catch {
     return initialState();
@@ -159,16 +192,37 @@ function save(json: string) {
 
 type Recipe = (draft: MissionState) => void;
 
+/** What an auto-checked answer tells us about the pilot who gave it. */
+export interface AnswerDetail {
+  skill: SkillId;
+  /** The word the item was about, if any — it goes on the review list. */
+  word?: WordId;
+  /** The grammar rule the item was about, if any. */
+  rule?: string;
+}
+
 interface Ctx {
   state: MissionState;
   /** True when typing-based tasks are allowed. */
   typing: boolean;
+  /** The pilot on turn. One queue runs through the whole mission. */
+  pilot: Pilot;
   update: (recipe: Recipe) => void;
   reset: () => void;
   goto: (activity: ActivityId) => void;
   next: () => void;
   finish: (activity: ActivityId, result?: Result) => void;
   award: (pilotIndex: number, stars?: number) => void;
+  /** Record an auto-checked answer against the pilot on turn. */
+  record: (correct: boolean, detail: AnswerDetail) => void;
+  /** Record it and hand the turn on — what the practice activities use. */
+  answer: (correct: boolean, detail: AnswerDetail) => void;
+  /** Hand the turn on without scoring — for the teacher-judged tasks. */
+  passTurn: () => void;
+  /** Put a named pilot on turn, so the teacher can ask whoever they like. */
+  setTurn: (pilotIndex: number) => void;
+  /** Put a word on the pilot's review list without touching their accuracy. */
+  flagWord: (word: WordId) => void;
 }
 
 const GameContext = createContext<Ctx | null>(null);
@@ -211,7 +265,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       if (e.key !== KEY || !e.newValue || e.newValue === written.current) return;
       try {
         const incoming = JSON.parse(e.newValue) as MissionState;
-        if (incoming?.v !== 2) return;
+        if (incoming?.v !== 3) return;
         written.current = e.newValue;
         setState({ ...initialState(), ...incoming });
       } catch {
@@ -260,9 +314,78 @@ export function GameProvider({ children }: { children: ReactNode }) {
     [update],
   );
 
+  const onTurn = (d: MissionState) => d.pilots[d.turn % Math.max(1, d.pilots.length)];
+
+  const passTurn = useCallback(
+    () => update((d) => void (d.turn = (d.turn + 1) % Math.max(1, d.pilots.length))),
+    [update],
+  );
+
+  const setTurn = useCallback(
+    (pilotIndex: number) => update((d) => void (d.turn = pilotIndex % Math.max(1, d.pilots.length))),
+    [update],
+  );
+
+  const record = useCallback(
+    (correct: boolean, detail: AnswerDetail) => {
+      update((d) => {
+        const p = onTurn(d);
+        if (!p) return;
+        const tally = p.skills[detail.skill];
+        if (correct) tally.right += 1;
+        else tally.wrong += 1;
+        if (!correct && detail.word && !p.missedWords.includes(detail.word)) p.missedWords.push(detail.word);
+        if (!correct && detail.rule && !p.missedRules.includes(detail.rule)) p.missedRules.push(detail.rule);
+      });
+    },
+    [update],
+  );
+
+  const answer = useCallback(
+    (correct: boolean, detail: AnswerDetail) => {
+      update((d) => {
+        const p = onTurn(d);
+        if (p) {
+          const tally = p.skills[detail.skill];
+          if (correct) tally.right += 1;
+          else tally.wrong += 1;
+          if (!correct && detail.word && !p.missedWords.includes(detail.word)) p.missedWords.push(detail.word);
+          if (!correct && detail.rule && !p.missedRules.includes(detail.rule)) p.missedRules.push(detail.rule);
+        }
+        d.turn = (d.turn + 1) % Math.max(1, d.pilots.length);
+      });
+    },
+    [update],
+  );
+
+  const flagWord = useCallback(
+    (word: WordId) => {
+      update((d) => {
+        const p = onTurn(d);
+        if (p && !p.missedWords.includes(word)) p.missedWords.push(word);
+      });
+    },
+    [update],
+  );
+
   const value = useMemo<Ctx>(
-    () => ({ state, typing: state.mode === 'solo', update, reset, goto, next, finish, award }),
-    [state, update, reset, goto, next, finish, award],
+    () => ({
+      state,
+      typing: state.mode === 'solo',
+      pilot: state.pilots[state.turn % Math.max(1, state.pilots.length)],
+      update,
+      reset,
+      goto,
+      next,
+      finish,
+      award,
+      record,
+      answer,
+      passTurn,
+      setTurn,
+      flagWord,
+    }),
+    [state, update, reset, goto, next, finish, award, record, answer, passTurn, setTurn, flagWord],
   );
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;
@@ -294,4 +417,18 @@ export function leaderboard(pilots: Pilot[]) {
 
 export function mvp(pilots: Pilot[]) {
   return [...pilots].sort((a, b) => b.stars - a.stars)[0];
+}
+
+/** Right / total across every auto-checked task. */
+export function accuracy(p: Pilot) {
+  const right = SKILLS.reduce((n, s) => n + (p.skills?.[s.id]?.right ?? 0), 0);
+  const wrong = SKILLS.reduce((n, s) => n + (p.skills?.[s.id]?.wrong ?? 0), 0);
+  return { right, total: right + wrong };
+}
+
+/** The pilot who answered most accurately — needs a few answers to count. */
+export function sharpest(pilots: Pilot[]) {
+  const scored = pilots.map((p) => ({ p, a: accuracy(p) })).filter((x) => x.a.total >= 3);
+  if (!scored.length) return undefined;
+  return scored.sort((x, y) => y.a.right / y.a.total - x.a.right / x.a.total)[0].p;
 }

@@ -18,7 +18,7 @@ const DRILLS = [
  * The card is never a list, so the projector always shows exactly one thing.
  */
 export function WordCards() {
-  const { finish } = useGame();
+  const { finish, answer: answerTurn } = useGame();
   const [i, setI] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [drills, setDrills] = useState<string[]>([]);
@@ -39,6 +39,7 @@ export function WordCards() {
     const ok = value === word.ccq.answer;
     ok ? sfx.right() : sfx.wrong();
     setMarks((m) => m.map((v, j) => (j === i ? ok : v)));
+    answerTurn(ok, { skill: 'vocabulary', word: word.id });
   };
 
   const go = (delta: number) => {
@@ -63,6 +64,7 @@ export function WordCards() {
     <Stage
       title="Ten words"
       step={`${i + 1} / ${WORDS.length}`}
+      turn
       aside={<Dots marks={marks} at={i} />}
       footer={
         <div className="btn-row">

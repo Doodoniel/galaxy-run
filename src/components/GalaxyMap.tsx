@@ -1,6 +1,7 @@
 import { PHASES, phaseOf, type ActivityId } from '../data/lesson';
-import { useGame } from '../state/game';
+import { accuracy, useGame } from '../state/game';
 import { Planet } from './Planet';
+import { Rocket, Star, tap } from './ui';
 import { sfx } from '../lib/audio';
 
 /**
@@ -44,9 +45,10 @@ export function PhaseMap() {
 
 /** The activities inside the current phase, plus the line the teacher says. */
 export function ActivityBar() {
-  const { state, goto } = useGame();
+  const { state, goto, setTurn } = useGame();
   const phase = phaseOf(state.activity);
   const index = PHASES.findIndex((p) => p.id === phase.id) + 1;
+  const onTurn = state.turn % Math.max(1, state.pilots.length);
 
   return (
     <div className="actbar" style={{ ['--phase' as string]: phase.colour }}>
@@ -71,7 +73,33 @@ export function ActivityBar() {
         ))}
       </div>
 
-      <span className="actbar__aim">{phase.aim}</span>
+      <div className="actbar__crew" title="Click a pilot to hand them the turn">
+        {state.pilots.map((p, i) => {
+          const acc = accuracy(p);
+          return (
+            <button
+              key={p.id}
+              className="crewchip"
+              data-active={i === onTurn}
+              style={{ ['--pilot' as string]: p.colour }}
+              onClick={tap(() => setTurn(i))}
+              title={`${p.callsign || 'pilot'} — ${p.stars} stars${acc.total ? `, ${acc.right}/${acc.total} correct` : ''}`}
+            >
+              <Rocket colour={p.colour} size={14} />
+              <b>{p.callsign || '—'}</b>
+              <span>
+                <Star size={10} /> {p.stars}
+              </span>
+              {acc.total > 0 && (
+                <span className="crewchip__acc">
+                  {acc.right}/{acc.total}
+                </span>
+              )}
+              {p.place && <i>#{p.place}</i>}
+            </button>
+          );
+        })}
+      </div>
       <span className="actbar__min">{phase.minutes}′</span>
     </div>
   );

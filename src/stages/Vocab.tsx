@@ -31,6 +31,7 @@ export function Vocab() {
 /* ------------------------------------------------- round 1 · meanings */
 
 function Meanings({ onDone }: { onDone: (right: number) => void }) {
+  const { answer: answerTurn } = useGame();
   const order = useMemo(() => shuffle(WORDS, 0.42), []);
   const [i, setI] = useState(0);
   const [picked, setPicked] = useState<string | null>(null);
@@ -52,6 +53,7 @@ function Meanings({ onDone }: { onDone: (right: number) => void }) {
     ok ? sfx.right() : sfx.wrong();
     speak(word.word);
     setMarks((m) => m.map((v, j) => (j === i ? ok : v)));
+    answerTurn(ok, { skill: 'vocabulary', word: word.id });
   };
 
   const go = () => {
@@ -69,6 +71,7 @@ function Meanings({ onDone }: { onDone: (right: number) => void }) {
     <Stage
       title="Which word means this?"
       step={`${i + 1} / ${order.length}`}
+      turn
       aside={<Dots marks={marks} at={i} />}
       footer={
         <button className="btn" onClick={go} disabled={!picked}>
@@ -104,10 +107,12 @@ function Meanings({ onDone }: { onDone: (right: number) => void }) {
 /* ------------------------------------------------ round 2 · sentences */
 
 function Gaps({ carried, onBack }: { carried: number; onBack: () => void }) {
-  const { finish } = useGame();
+  const { finish, answer: answerTurn } = useGame();
   const [i, setI] = useState(0);
   const [filled, setFilled] = useState<string[]>([]);
   const [wrong, setWrong] = useState<string | null>(null);
+  /** Whether this sentence has already cost the pilot a wrong chip. */
+  const [slipped, setSlipped] = useState(false);
   const [marks, setMarks] = useState<(boolean | null)[]>(Array(GAP_FILL.length).fill(null));
 
   const item = GAP_FILL[i];
@@ -129,11 +134,14 @@ function Gaps({ carried, onBack }: { carried: number; onBack: () => void }) {
       const next = [...filled, chip];
       setFilled(next);
       if (next.length === item.surface.length) {
-        setMarks((m) => m.map((v, j) => (j === i ? (wrong === null ? true : false) : v)));
+        const clean = !slipped;
+        setMarks((m) => m.map((v, j) => (j === i ? clean : v)));
+        answerTurn(clean, { skill: 'vocabulary', word: item.answers[0] });
       }
     } else {
       sfx.wrong();
       setWrong(chip);
+      setSlipped(true);
       window.setTimeout(() => setWrong(null), 450);
       setMarks((m) => m.map((v, j) => (j === i ? false : v)));
     }
@@ -154,6 +162,7 @@ function Gaps({ carried, onBack }: { carried: number; onBack: () => void }) {
     setI(i + 1);
     setFilled([]);
     setWrong(null);
+    setSlipped(false);
     sfx.tap();
   };
 
@@ -161,6 +170,7 @@ function Gaps({ carried, onBack }: { carried: number; onBack: () => void }) {
     <Stage
       title="Complete the sentence"
       step={`${i + 1} / ${GAP_FILL.length}`}
+      turn
       aside={
         <div className="row" style={{ gap: 8 }}>
           <Dots marks={marks} at={i} />

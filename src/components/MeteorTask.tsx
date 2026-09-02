@@ -15,7 +15,8 @@ export function MeteorTask({
   showRule = true,
 }: {
   card: MeteorCard;
-  onSolved: () => void;
+  /** `clean` is true when the pilot found and fixed it with no wrong taps. */
+  onSolved: (clean: boolean) => void;
   showRule?: boolean;
 }) {
   const [found, setFound] = useState(false);
@@ -43,7 +44,8 @@ export function MeteorTask({
     setChosen(opt);
     if (opt === card.fix) {
       sfx.meteor();
-      window.setTimeout(onSolved, 700);
+      const clean = tries === 0;
+      window.setTimeout(() => onSolved(clean), 700);
     } else {
       sfx.wrong();
       setTries((t) => t + 1);
