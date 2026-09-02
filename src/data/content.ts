@@ -414,14 +414,12 @@ export const USEFUL_PHRASES = [
   'It’s the opposite of…',
 ];
 
-/* ------------------------------------------------------------------ *
- * WILD cards from the WORD deck
- * ------------------------------------------------------------------ */
-
-export const WILD_CARDS = [
-  { id: 'w1', task: 'Mime any word from the mission. No talking!' },
-  { id: 'w2', task: 'Draw any word in 15 seconds. Your crew guesses.' },
-];
+/*
+ * The printed WORD deck also holds two wild cards — mime a word, draw a word.
+ * Both are body-and-paper tasks: there is nothing to mime into and nothing to
+ * draw on when the whole crew is looking at one shared screen, so the online
+ * deck is the ten words alone.
+ */
 
 /* ------------------------------------------------------------------ *
  * THE BOARD · 20 tiles from START to NEW SCHOOL

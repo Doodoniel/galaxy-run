@@ -6,7 +6,6 @@ import {
   STAR_CARDS,
   TILE_INFO,
   USEFUL_PHRASES,
-  WILD_CARDS,
   WORDS,
   type MeteorCard,
   type MiraCard,
@@ -36,7 +35,7 @@ import { artUrl } from '../lib/art';
 const GAME_METEORS = METEOR_CARDS.filter((c) => !CHECK_METEORS.some((s) => s.id === c.id));
 
 type Task =
-  | { kind: 'word'; word: Word | null; wild?: (typeof WILD_CARDS)[number] }
+  | { kind: 'word'; word: Word }
   | { kind: 'meteor'; card: MeteorCard }
   | { kind: 'mira'; card: MiraCard }
   | { kind: 'star'; card: StarCard }
@@ -153,9 +152,6 @@ export function GalaxyRun() {
     };
 
     if (kind === 'word') {
-      if (Math.random() < 0.15) {
-        return { kind: 'word', word: null, wild: WILD_CARDS[Math.floor(Math.random() * WILD_CARDS.length)] };
-      }
       const word = pull(WORDS, state.run.usedWord, (ids) => update((d) => void (d.run.usedWord = ids)));
       return { kind: 'word', word };
     }
@@ -528,33 +524,7 @@ function WordTile({
   const [revealed, setRevealed] = useState(false);
   const [running, setRunning] = useState(false);
 
-  if (task.wild) {
-    return (
-      <div className="center">
-        <span className="card-label">Wild card</span>
-        <h3 className="q q--sm">{task.wild.task}</h3>
-        <CountdownRing seconds={20} running={running} runKey={task.wild.id} size={100} label="20 seconds" />
-        <div className="btn-row" style={{ justifyContent: 'center' }}>
-          {!running ? (
-            <button className="btn" onClick={() => setRunning(true)}>
-              Start
-            </button>
-          ) : (
-            <>
-              <button className="btn btn--star" onClick={() => onSucceed('wild card done')}>
-                <Star size={15} /> Crew guessed it
-              </button>
-              <button className="btn btn--ghost" onClick={() => onFail('wild card missed')}>
-                No star
-              </button>
-            </>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  const word = task.word!;
+  const word = task.word;
 
   if (!revealed) {
     return (
