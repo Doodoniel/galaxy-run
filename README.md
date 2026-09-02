@@ -23,8 +23,8 @@ ahead, and clicking one jumps there.
 
 | # | Phase | What happens | Min |
 | --- | --- | --- | --- |
-| 1 | **Lead-in** · Mission Briefing | Callsigns, rockets, mode, what today is about | 0–4 |
-| 2 | **Presentation** · Word Lab & Story | Ten words one card at a time (picture → word → stress → drill → concept check, plus an optional *Freeze!* round). Then the story as a **shared reading**: six spreads, picture and sentence side by side, the teacher reads and the crew reads back — then the text goes away and they retell it from the six pictures alone | 4–20 |
+| 1 | **Lead-in** · Mission Briefing | Callsigns, rockets, mode, what today is about — then the launch | 0–4 |
+| 2 | **Presentation** · Word Lab & Story | Ten words one card at a time: picture → word → stress → choral drill → concept check. Then the story as a **shared reading**: six spreads, picture and sentence side by side, the teacher reads and the crew reads back — then the text goes away and they retell it from the six pictures alone | 4–20 |
 | 3 | **Controlled practice** · Check & Drill | Vocabulary (meaning → word, then the word back into a sentence), Story check (true/false, then the meteor storm of one-mistake sentences), Speed round (60 seconds, ten words, per pilot) | 20–36 |
 | 4 | **Production** · Now Speak | Galaxy Run — the 20-tile board race: WORD · METEOR · MIRA · STAR · BOOST · WORMHOLE. Then My Planet: design one, pitch it in fifteen seconds | 36–58 |
 | 5 | **Feedback** · Landing | Race winner, MVP, crew record, per-pilot report, homework, printable | 58–60 |

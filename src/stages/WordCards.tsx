@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { WORDS } from '../data/content';
 import { useGame } from '../state/game';
 import { NextButton, Stage } from '../components/Shell';
-import { Dots, SayIt, Syllables, Verdict, WordArt, shuffle, tap } from '../components/ui';
+import { Dots, SayIt, Syllables, Verdict, WordArt } from '../components/ui';
 import { sfx, speak } from '../lib/audio';
 
 const DRILLS = [
@@ -24,7 +24,6 @@ export function WordCards() {
   const [drills, setDrills] = useState<string[]>([]);
   const [ccq, setCcq] = useState<boolean | null>(null);
   const [marks, setMarks] = useState<(boolean | null)[]>(Array(WORDS.length).fill(null));
-  const [freeze, setFreeze] = useState(false);
 
   const word = WORDS[i];
   const ccqRight = ccq !== null && ccq === word.ccq.answer;
@@ -60,20 +59,11 @@ export function WordCards() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [last, ccq]);
 
-  if (freeze) return <FreezeRound onDone={() => setFreeze(false)} />;
-
   return (
     <Stage
       title="Ten words"
       step={`${i + 1} / ${WORDS.length}`}
-      aside={
-        <div className="row" style={{ gap: 8 }}>
-          <Dots marks={marks} at={i} />
-          <button className="btn btn--ghost btn--sm" onClick={tap(() => setFreeze(true))}>
-            🧊 Freeze round
-          </button>
-        </div>
-      }
+      aside={<Dots marks={marks} at={i} />}
       footer={
         <div className="btn-row">
           {i > 0 && (
@@ -194,105 +184,6 @@ export function WordCards() {
             </div>
           )}
         </div>
-      </div>
-    </Stage>
-  );
-}
-
-/* ================================================================== *
- * FREEZE — the whole crew becomes the word. No scoring, pure energy.
- * ================================================================== */
-
-function FreezeRound({ onDone }: { onDone: () => void }) {
-  const [order] = useState(() => shuffle(WORDS, Math.random()));
-  const [i, setI] = useState(0);
-  const [phase, setPhase] = useState<'idle' | 'count' | 'freeze'>('idle');
-  const [count, setCount] = useState(3);
-
-  const word = order[i];
-
-  useEffect(() => {
-    if (phase !== 'count') return;
-    if (count === 0) {
-      setPhase('freeze');
-      sfx.star();
-      return;
-    }
-    const id = window.setTimeout(() => {
-      sfx.tick();
-      setCount((c) => c - 1);
-    }, 900);
-    return () => window.clearTimeout(id);
-  }, [phase, count]);
-
-  return (
-    <Stage
-      title="Freeze!"
-      step={`${i + 1} / ${order.length}`}
-      hint="“A chameleon does not speak — it becomes the word. Ten seconds. Three, two, one — freeze!”"
-      footer={
-        <button className="btn btn--ghost" onClick={onDone}>
-          ← Back to the cards
-        </button>
-      }
-    >
-      <div className="center">
-        {phase === 'idle' && (
-          <div className="center pop">
-            <WordArt word={word} size="min(220px, 24vh)" />
-            <div className="q">{word.word}</div>
-            <button
-              className="btn btn--lg"
-              onClick={() => {
-                setPhase('count');
-                setCount(3);
-                sfx.tap();
-              }}
-            >
-              Three, two, one…
-            </button>
-          </div>
-        )}
-
-        {phase === 'count' && (
-          <div
-            key={count}
-            className="pop"
-            style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(70px, 26vh, 220px)', lineHeight: 1 }}
-          >
-            {count === 0 ? 'FREEZE!' : count}
-          </div>
-        )}
-
-        {phase === 'freeze' && (
-          <div className="center pop">
-            <div
-              style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: 'clamp(34px, 10vh, 96px)',
-                color: 'var(--yellow)',
-                textShadow: '0 0 40px rgba(255,201,60,.6)',
-              }}
-            >
-              {word.word}
-            </div>
-            <p className="hint">Hold the pose. Two seconds — that is the shot.</p>
-            <button
-              className="btn btn--lg"
-              onClick={() => {
-                if (i + 1 >= order.length) {
-                  sfx.fanfare();
-                  onDone();
-                  return;
-                }
-                setI(i + 1);
-                setPhase('idle');
-              }}
-            >
-              {i + 1 >= order.length ? 'Finish · 10 words' : 'Next word →'}
-            </button>
-          </div>
-        )}
       </div>
     </Stage>
   );

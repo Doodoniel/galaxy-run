@@ -3,7 +3,8 @@ import { OBJECTIVES } from '../data/lesson';
 import { makePilot, PILOT_COLOURS, useGame, type Mode } from '../state/game';
 import { Modal, Rocket, tap } from '../components/ui';
 import { artUrl } from '../lib/art';
-import { NextButton, Stage } from '../components/Shell';
+import { sfx } from '../lib/audio';
+import { Stage } from '../components/Shell';
 
 const IDEAS = ['Falcon', 'Nova', 'Comet', 'Orbit', 'Blaze', 'Echo'];
 
@@ -23,11 +24,19 @@ const MODES: { id: Mode; icon: string; label: string; blurb: string }[] = [
 ];
 
 export function Crew() {
-  const { state, update } = useGame();
+  const { state, update, next } = useGame();
   const [showAims, setShowAims] = useState(false);
+  const [launching, setLaunching] = useState(false);
 
   const pilots = state.pilots;
   const ready = pilots.every((p) => p.callsign.trim().length > 0);
+
+  /** Ignition, then straight into Word Lab. */
+  const launch = () => {
+    sfx.launch();
+    setLaunching(true);
+    window.setTimeout(next, 1250);
+  };
 
   const setMode = (mode: Mode) =>
     update((d) => {
@@ -45,7 +54,11 @@ export function Crew() {
           🎯 Aims
         </button>
       }
-      footer={<NextButton label={ready ? 'Launch' : 'Callsigns first'} disabled={!ready} />}
+      footer={
+        <button className="btn btn--lg" onClick={launch} disabled={!ready || launching}>
+          {launching ? 'Lift-off…' : ready ? '🚀 Launch' : 'Callsigns first'}
+        </button>
+      }
     >
       <div
         className="split"
@@ -182,6 +195,13 @@ export function Crew() {
           </p>
         </div>
       </div>
+
+      {launching && (
+        <div className="liftoff" aria-hidden="true">
+          <div className="liftoff__plume" />
+          <img className="liftoff__ship" src={artUrl('spaceship')} alt="" />
+        </div>
+      )}
 
       <Modal open={showAims} onClose={() => setShowAims(false)} title="What the pilots can do by 60:00">
         <div className="col" style={{ gap: 8 }}>
