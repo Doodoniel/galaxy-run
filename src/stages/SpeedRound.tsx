@@ -7,15 +7,14 @@ import { sfx, speak } from '../lib/audio';
 
 interface Question {
   word: Word;
-  options: Word[];
+  options: string[];
 }
 
 function buildQueue(): Question[] {
   const out: Question[] = [];
   for (let r = 0; r < 6; r++) {
     for (const w of shuffle(WORDS, Math.random())) {
-      const others = shuffle(WORDS.filter((x) => x.id !== w.id), Math.random()).slice(0, 3);
-      out.push({ word: w, options: shuffle([w, ...others], Math.random()) });
+      out.push({ word: w, options: shuffle([w.word, ...w.neighbours], Math.random()) });
     }
   }
   return out;
@@ -52,9 +51,9 @@ export function SpeedRound() {
     sfx.launch();
   };
 
-  const answer = (choice: Word) => {
+  const answer = (choice: string) => {
     if (phase !== 'run' || !current) return;
-    if (choice.id === current.word.id) {
+    if (choice === current.word.word) {
       sfx.right();
       setScore((s) => s + 1);
       setFlash('ok');
@@ -131,8 +130,8 @@ export function SpeedRound() {
 
           <div className="opts opts--2">
             {current.options.map((o) => (
-              <button key={o.id} className="opt" style={{ justifyContent: 'center' }} onClick={() => answer(o)}>
-                {o.word}
+              <button key={o} className="opt" style={{ justifyContent: 'center' }} onClick={() => answer(o)}>
+                {o}
               </button>
             ))}
           </div>

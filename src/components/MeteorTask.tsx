@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import type { MeteorCard } from '../data/content';
-import { Verdict, shuffle } from './ui';
+import { TypeAnswer, Verdict, shuffle } from './ui';
+import { useGame } from '../state/game';
 import { sfx } from '../lib/audio';
 
 /**
@@ -19,6 +20,7 @@ export function MeteorTask({
   onSolved: (clean: boolean) => void;
   showRule?: boolean;
 }) {
+  const { typing } = useGame();
   const [found, setFound] = useState(false);
   const [missTap, setMissTap] = useState<number | null>(null);
   const [chosen, setChosen] = useState<string | null>(null);
@@ -94,7 +96,26 @@ export function MeteorTask({
         })}
       </div>
 
-      {found && (
+      {found && typing && (
+        <div className="pop" style={{ width: 'min(760px, 100%)' }}>
+          <TypeAnswer
+            answer={card.fix}
+            choices={options}
+            placeholder="write it correctly"
+            onSubmit={(ok) => {
+              sfx.meteor();
+              window.setTimeout(() => onSolved(ok && tries === 0), 900);
+            }}
+          />
+          {showRule && (
+            <p className="hint" style={{ textAlign: 'center', marginTop: 8 }}>
+              Rule: <b style={{ color: 'var(--yellow)' }}>{card.rule}</b>
+            </p>
+          )}
+        </div>
+      )}
+
+      {found && !typing && (
         <div className="pop" style={{ width: 'min(760px, 100%)' }}>
           <div className="opts" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
             {options.map((o) => (

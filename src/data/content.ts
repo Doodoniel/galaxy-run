@@ -35,6 +35,14 @@ export interface Word {
   ccq: { q: string; answer: boolean; because: string };
   /** WORD card taboo words from the board game deck. */
   taboo: [string, string];
+  /**
+   * Three wrong answers from the same corner of the world — animals for an
+   * animal, space for a galaxy. Picking between `galaxy / star / space / moon`
+   * tests whether the pilot knows what the word means; picking between
+   * `galaxy / owl / wise / travel` only tests whether they can spot the odd one
+   * out. These are never other mission words, for the same reason.
+   */
+  neighbours: [string, string, string];
   /** A model sentence using the word (from the story / worksheet 1B). */
   example: string;
   image: string;
@@ -49,6 +57,7 @@ export const WORDS: Word[] = [
     definition: 'an animal that can change its colour',
     ccq: { q: 'Is it a bird?', answer: false, because: 'No — it is a lizard.' },
     taboo: ['colour', 'animal'],
+    neighbours: ['lizard', 'frog', 'snake'],
     example: 'Richie is a chameleon. He can change his colour.',
     image: 'chameleon',
   },
@@ -60,6 +69,7 @@ export const WORDS: Word[] = [
     definition: 'a very big group of stars in space',
     ccq: { q: 'Is it small?', answer: false, because: 'No — a galaxy is huge.' },
     taboo: ['space', 'stars'],
+    neighbours: ['star', 'space', 'moon'],
     example: 'He lives in a faraway galaxy.',
     image: 'galaxy',
   },
@@ -71,6 +81,7 @@ export const WORDS: Word[] = [
     definition: 'something you really want in the future',
     ccq: { q: 'Is it a hope?', answer: true, because: 'Yes — a dream is a big hope.' },
     taboo: ['sleep', 'want'],
+    neighbours: ['wish', 'hope', 'sleep'],
     example: 'Richie has a big dream: he wants to speak English.',
     image: 'dream',
   },
@@ -82,6 +93,7 @@ export const WORDS: Word[] = [
     definition: 'very clever, with a lot of experience',
     ccq: { q: 'Is a wise person smart?', answer: true, because: 'Yes — wise means very clever.' },
     taboo: ['clever', 'old'],
+    neighbours: ['clever', 'kind', 'funny'],
     example: 'Mira is a wise old owl.',
     image: 'wise',
   },
@@ -93,6 +105,7 @@ export const WORDS: Word[] = [
     definition: 'a big bird that flies at night',
     ccq: { q: 'Does it fly at night?', answer: true, because: 'Yes — owls fly at night.' },
     taboo: ['bird', 'night'],
+    neighbours: ['eagle', 'parrot', 'bat'],
     example: 'A wise old owl comes to him. Her name is Mira.',
     image: 'owl',
   },
@@ -104,6 +117,7 @@ export const WORDS: Word[] = [
     definition: 'a big round object that goes around a star',
     ccq: { q: 'Is it in space?', answer: true, because: 'Yes — planets are in space.' },
     taboo: ['Earth', 'round'],
+    neighbours: ['moon', 'star', 'sun'],
     example: 'On every planet he learns new words.',
     image: 'planet',
   },
@@ -115,6 +129,7 @@ export const WORDS: Word[] = [
     definition: 'a machine that flies to other planets',
     ccq: { q: 'Do people fly in it?', answer: true, because: 'Yes — people fly in a spaceship.' },
     taboo: ['fly', 'rocket'],
+    neighbours: ['plane', 'car', 'boat'],
     example: 'Richie gets on a bright and colourful spaceship.',
     image: 'spaceship',
   },
@@ -126,6 +141,7 @@ export const WORDS: Word[] = [
     definition: 'an exciting and unusual experience',
     ccq: { q: 'Is it boring?', answer: false, because: 'No — an adventure is exciting!' },
     taboo: ['exciting', 'journey'],
+    neighbours: ['journey', 'holiday', 'story'],
     example: 'Amazing adventures wait for him!',
     image: 'adventure',
   },
@@ -137,6 +153,7 @@ export const WORDS: Word[] = [
     definition: 'to go from one place to another place',
     ccq: { q: 'Do you stay at home?', answer: false, because: 'No — you go to new places.' },
     taboo: ['go', 'country'],
+    neighbours: ['to walk', 'to visit', 'to fly'],
     example: 'He wants to travel and see new places.',
     image: 'travel',
   },
@@ -148,6 +165,7 @@ export const WORDS: Word[] = [
     definition: 'to meet people and become close to them',
     ccq: { q: 'Do you do it alone?', answer: false, because: 'No — you need other people.' },
     taboo: ['people', 'new'],
+    neighbours: ['to meet', 'to help', 'to play'],
     example: 'Richie also wants to make new friends.',
     image: 'make_friends',
   },

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import type { Word } from '../data/content';
 import { sfx, speak } from '../lib/audio';
 import { artUrl } from '../lib/art';
+import { sameWord } from '../lib/text';
 
 /* ------------------------------------------------------------------ stars */
 
@@ -112,6 +113,79 @@ export function Opt({
       {hotkey && <span className="opt__key">{hotkey}</span>}
       <span style={{ flex: 1 }}>{children}</span>
     </button>
+  );
+}
+
+/**
+ * Type the answer instead of picking it off a list — what a one-to-one lesson
+ * gets, because there is one keyboard and one pilot to use it. Recall is
+ * harder than recognition, which is the point.
+ *
+ * Spelling has to be right; case, articles and punctuation do not.
+ */
+export function TypeAnswer({
+  answer,
+  choices,
+  placeholder = 'type it',
+  onSubmit,
+}: {
+  answer: string;
+  /** What the hint offers when the pilot is stuck — already shuffled. */
+  choices?: string[];
+  placeholder?: string;
+  onSubmit: (correct: boolean) => void;
+}) {
+  const [value, setValue] = useState('');
+  const [verdict, setVerdict] = useState<'idle' | 'right' | 'wrong'>('idle');
+  const [hint, setHint] = useState(false);
+
+  const settle = (given: string) => {
+    if (verdict !== 'idle' || !given.trim()) return;
+    const ok = sameWord(given, answer);
+    setVerdict(ok ? 'right' : 'wrong');
+    ok ? sfx.right() : sfx.wrong();
+    onSubmit(ok);
+  };
+
+  const submit = () => settle(value);
+
+  return (
+    <div className="center" style={{ gap: 'calc(var(--u)*.7)', width: '100%' }}>
+      <div className="row" style={{ justifyContent: 'center', flexWrap: 'nowrap' }}>
+        <input
+          className="field"
+          style={{ maxWidth: 340, textAlign: 'center', fontSize: 'clamp(16px, 2.6vh, 24px)' }}
+          value={value}
+          placeholder={placeholder}
+          autoFocus
+          disabled={verdict !== 'idle'}
+          onChange={(e) => setValue(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && submit()}
+          aria-label="Type your answer"
+        />
+        <button className="btn" onClick={submit} disabled={verdict !== 'idle' || !value.trim()}>
+          Check
+        </button>
+      </div>
+
+      {verdict === 'idle' ? (
+        hint && choices?.length ? (
+          <div className="opts opts--2 pop" style={{ width: 'min(620px, 100%)' }}>
+            {choices.map((c) => (
+              <button key={c} className="opt" style={{ justifyContent: 'center' }} onClick={() => settle(c)}>
+                {c}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <button className="btn btn--ghost btn--sm" onClick={() => setHint(true)} disabled={!choices?.length}>
+            💡 Hint
+          </button>
+        )
+      ) : (
+        <Verdict ok={verdict === 'right'} text={verdict === 'right' ? `Yes — ${answer}` : `It is “${answer}”`} />
+      )}
+    </div>
   );
 }
 

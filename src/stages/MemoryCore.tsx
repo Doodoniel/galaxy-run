@@ -35,7 +35,14 @@ const clean = (s: string) =>
 export function MemoryCore({ onClose }: { onClose: () => void }) {
   const { state, typing, update } = useGame();
   const [who, setWho] = useState(0);
-  const [current, setCurrent] = useState<{ word: Word; drill: Drill; options: Word[] } | null>(null);
+  const [current, setCurrent] = useState<{
+    word: Word;
+    drill: Drill;
+    /** Pictures, for "which picture is it" — only the mission art exists. */
+    pictures: Word[];
+    /** Words, from this word's own family — never the other mission words. */
+    choices: string[];
+  } | null>(null);
   const [answer, setAnswer] = useState<string | null>(null);
   const [typed, setTyped] = useState('');
   const [burst, setBurst] = useState(0);
@@ -53,8 +60,11 @@ export function MemoryCore({ onClose }: { onClose: () => void }) {
     if (!typing) drills = drills.filter((d) => d !== 'type');
     if (!drills.length) drills = ['def2word'];
     const drill = drills[Math.floor(Math.random() * drills.length)];
-    const others = shuffle(WORDS.filter((w) => w.id !== word.id), Math.random()).slice(0, 3);
-    setCurrent({ word, drill, options: shuffle([word, ...others], Math.random()) });
+    const pictures = shuffle(
+      [word, ...shuffle(WORDS.filter((w) => w.id !== word.id), Math.random()).slice(0, 3)],
+      Math.random(),
+    );
+    setCurrent({ word, drill, pictures, choices: shuffle([word.word, ...word.neighbours], Math.random()) });
     setAnswer(null);
     setTyped('');
     if (drill === 'listen2word') window.setTimeout(() => speak(word.word), 320);
@@ -96,7 +106,13 @@ export function MemoryCore({ onClose }: { onClose: () => void }) {
 
   if (!pilot || !current) return null;
 
-  const choose = (w: Word) => {
+  const choose = (given: string) => {
+    if (answer) return;
+    setAnswer(given);
+    grade(given === current.word.word);
+  };
+
+  const choosePicture = (w: Word) => {
     if (answer) return;
     setAnswer(w.id);
     grade(w.id === current.word.id);
@@ -105,11 +121,14 @@ export function MemoryCore({ onClose }: { onClose: () => void }) {
   const submit = () => {
     if (answer) return;
     const ok = clean(typed) === clean(current.word.word);
-    setAnswer(ok ? current.word.id : 'typed-wrong');
+    setAnswer(ok ? current.word.word : 'typed-wrong');
     grade(ok);
   };
 
-  const optState = (w: Word) =>
+  const wordState = (given: string) =>
+    !answer ? undefined : given === current.word.word ? 'right' : answer === given ? 'wrong' : 'muted';
+
+  const pictureState = (w: Word) =>
     !answer ? undefined : w.id === current.word.id ? 'right' : answer === w.id ? 'wrong' : 'muted';
 
   const prompt = {
@@ -236,20 +255,35 @@ export function MemoryCore({ onClose }: { onClose: () => void }) {
             </>
           )}
 
-          {current.drill !== 'type' && (
-            <div className={`opts ${current.drill === 'word2pic' ? '' : 'opts--2'}`} style={
-              current.drill === 'word2pic' ? { gridTemplateColumns: 'repeat(4, 1fr)' } : undefined
-            }>
-              {current.options.map((o) => (
+          {current.drill === 'word2pic' && (
+            <div className="opts" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+              {current.pictures.map((o) => (
                 <button
                   key={o.id}
                   className="opt"
-                  data-state={optState(o)}
+                  data-state={pictureState(o)}
+                  disabled={!!answer}
+                  onClick={() => choosePicture(o)}
+                  style={{ justifyContent: 'center' }}
+                >
+                  <WordArt word={o} size="min(120px, 16vh)" float={false} />
+                </button>
+              ))}
+            </div>
+          )}
+
+          {current.drill !== 'type' && current.drill !== 'word2pic' && (
+            <div className="opts opts--2">
+              {current.choices.map((o) => (
+                <button
+                  key={o}
+                  className="opt"
+                  data-state={wordState(o)}
                   disabled={!!answer}
                   onClick={() => choose(o)}
                   style={{ justifyContent: 'center' }}
                 >
-                  {current.drill === 'word2pic' ? <WordArt word={o} size="min(120px, 16vh)" float={false} /> : o.word}
+                  {o}
                 </button>
               ))}
             </div>
@@ -257,7 +291,7 @@ export function MemoryCore({ onClose }: { onClose: () => void }) {
 
           {answer && (
             <Verdict
-              ok={answer === current.word.id}
+              ok={answer === current.word.word || answer === current.word.id}
               text={
                 answer === current.word.id
                   ? `${current.word.word} — ${current.word.definition}`

@@ -80,7 +80,7 @@ function Mission() {
         <button
           className="btn btn--ghost btn--sm"
           onClick={tap(() => update((d) => void (d.mode = d.mode === 'class' ? 'solo' : 'class')))}
-          title="Class = one shared screen, no typing. Solo = one learner, typing drills on."
+          title="Class = 2–6 pilots on one screen, tapping. Solo = one-to-one, the pilot types."
         >
           {state.mode === 'class' ? '📽' : '🧑‍🚀'} <span className="hide-sm">{state.mode}</span>
         </button>

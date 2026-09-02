@@ -17,12 +17,16 @@ import type { PlanetLook } from '../data/lesson';
  * ------------------------------------------------------------------ */
 
 /**
- * `class`  — one screen for everybody: a projector, or a shared screen in a
- *            video call. Nobody types; the teacher (or one pilot at the
- *            keyboard) taps, and the crew answers out loud.
- * `solo`   — one learner on their own device: typing drills are switched on
- *            and the reflection fields appear, because there is somebody
- *            there to fill them in.
+ * Both modes have a teacher in them — what changes is how many pilots there
+ * are and who is holding the keyboard.
+ *
+ * `class` — 2 to 6 pilots round one screen: a projector, or a shared screen in
+ *           a call. Nobody types, because only one person can; answers are
+ *           tapped and called out loud, and the turn passes round the crew.
+ * `solo`  — a one-to-one lesson. One pilot with their own keyboard, sharing
+ *           their screen, so they type their answers instead of picking them
+ *           off a list. Recall beats recognition when it is just the two of
+ *           you and there is time to think.
  */
 export type Mode = 'class' | 'solo';
 

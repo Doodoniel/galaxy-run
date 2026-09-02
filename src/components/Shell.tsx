@@ -32,6 +32,7 @@ export function Stage({
 }) {
   const { state } = useGame();
   const say = activityOf(state.activity).says;
+  void state;
 
   return (
     <section className="stage">
@@ -46,7 +47,7 @@ export function Stage({
       <div className="stage__body">{children}</div>
 
       <footer className="stage__foot">
-        <span className="stage__say">{hint ?? (state.mode === 'class' ? say : null)}</span>
+        <span className="stage__say">{hint ?? say}</span>
         <span className="stage__gap" />
         {footer}
       </footer>

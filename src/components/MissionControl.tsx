@@ -82,7 +82,9 @@ export function MissionControl({ open, onClose }: { open: boolean; onClose: () =
               {m === 'class' ? '📽 Class' : '🧑‍🚀 Solo'}
             </button>
           ))}
-          <span className="hint">{state.mode === 'class' ? 'no typing anywhere' : 'typing drills on'}</span>
+          <span className="hint">
+            {state.mode === 'class' ? '2–6 pilots, tap only' : 'one pilot, typed answers'}
+          </span>
         </div>
 
         <div className="row" style={{ gap: 6, margin: 'calc(var(--u)*.9) 0' }}>

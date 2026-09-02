@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
-import { GAP_FILL, WORDS, type Word } from '../data/content';
+import { GAP_FILL, WORDS } from '../data/content';
 import { useGame } from '../state/game';
 import { NextButton, Stage } from '../components/Shell';
-import { Dots, Verdict, WordArt, shuffle, tap } from '../components/ui';
+import { Dots, TypeAnswer, Verdict, WordArt, shuffle, tap } from '../components/ui';
 import { sfx, speak } from '../lib/audio';
 
 /**
@@ -31,25 +31,22 @@ export function Vocab() {
 /* ------------------------------------------------- round 1 · meanings */
 
 function Meanings({ onDone }: { onDone: (right: number) => void }) {
-  const { answer: answerTurn } = useGame();
+  const { typing, answer: answerTurn } = useGame();
   const order = useMemo(() => shuffle(WORDS, 0.42), []);
   const [i, setI] = useState(0);
   const [picked, setPicked] = useState<string | null>(null);
   const [marks, setMarks] = useState<(boolean | null)[]>(Array(WORDS.length).fill(null));
 
   const word = order[i];
-  const options = useMemo(
-    () => shuffle([word, ...shuffle(WORDS.filter((w) => w.id !== word.id), i * 0.17).slice(0, 3)], i * 0.53),
-    [word, i],
-  );
+  const options = useMemo(() => shuffle([word.word, ...word.neighbours], i * 0.53), [word, i]);
 
   const right = marks.filter((m) => m === true).length;
   const last = i === order.length - 1;
 
-  const choose = (w: Word) => {
+  const choose = (given: string) => {
     if (picked) return;
-    const ok = w.id === word.id;
-    setPicked(w.id);
+    const ok = given === word.word;
+    setPicked(given);
     ok ? sfx.right() : sfx.wrong();
     speak(word.word);
     setMarks((m) => m.map((v, j) => (j === i ? ok : v)));
@@ -84,21 +81,35 @@ function Meanings({ onDone }: { onDone: (right: number) => void }) {
           “{word.definition}”
         </p>
 
-        <div className="opts opts--2">
-          {options.map((o, n) => (
-            <button
-              key={o.id}
-              className="opt"
-              data-state={picked ? (o.id === word.id ? 'right' : picked === o.id ? 'wrong' : 'muted') : undefined}
-              disabled={!!picked}
-              onClick={() => choose(o)}
-            >
-              <span className="opt__key">{String.fromCharCode(65 + n)}</span>
-              <span style={{ flex: 1 }}>{o.word}</span>
-              {picked && o.id === word.id && <WordArt word={o} size="min(58px, 7vh)" float={false} />}
-            </button>
-          ))}
-        </div>
+        {typing ? (
+          <TypeAnswer
+            key={`type-${word.id}`}
+            answer={word.word}
+            choices={options}
+            onSubmit={(ok) => {
+              setPicked(ok ? word.word : 'typed');
+              speak(word.word);
+              setMarks((m) => m.map((v, j) => (j === i ? ok : v)));
+              answerTurn(ok, { skill: 'vocabulary', word: word.id });
+            }}
+          />
+        ) : (
+          <div className="opts opts--2">
+            {options.map((o, n) => (
+              <button
+                key={o}
+                className="opt"
+                data-state={picked ? (o === word.word ? 'right' : picked === o ? 'wrong' : 'muted') : undefined}
+                disabled={!!picked}
+                onClick={() => choose(o)}
+              >
+                <span className="opt__key">{String.fromCharCode(65 + n)}</span>
+                <span style={{ flex: 1 }}>{o}</span>
+                {picked && o === word.word && <WordArt word={word} size="min(58px, 7vh)" float={false} />}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </Stage>
   );
@@ -107,7 +118,7 @@ function Meanings({ onDone }: { onDone: (right: number) => void }) {
 /* ------------------------------------------------ round 2 · sentences */
 
 function Gaps({ carried, onBack }: { carried: number; onBack: () => void }) {
-  const { finish, answer: answerTurn } = useGame();
+  const { typing, finish, answer: answerTurn } = useGame();
   const [i, setI] = useState(0);
   const [filled, setFilled] = useState<string[]>([]);
   const [wrong, setWrong] = useState<string | null>(null);
@@ -207,19 +218,43 @@ function Gaps({ carried, onBack }: { carried: number; onBack: () => void }) {
           ))}
         </p>
 
-        <div className="row" style={{ justifyContent: 'center', maxWidth: 'min(900px, 94vw)' }}>
-          {bank.map((chip) => (
-            <button
-              key={chip}
-              className={`chip ${wrong === chip ? 'shake' : ''}`}
-              style={wrong === chip ? { borderColor: 'var(--red)', background: 'rgba(244,68,46,.2)' } : undefined}
-              disabled={filled.includes(chip) || solved}
-              onClick={() => pick(chip)}
-            >
-              {chip}
-            </button>
-          ))}
-        </div>
+        {typing ? (
+          !solved && (
+            <TypeAnswer
+              key={`${i}-${filled.length}`}
+              answer={item.surface[filled.length]}
+              choices={bank}
+              placeholder="the missing word"
+              onSubmit={(ok) => {
+                if (!ok) setSlipped(true);
+                // Either way the word goes in, so the sentence can be read whole.
+                window.setTimeout(() => {
+                  const next = [...filled, item.surface[filled.length]];
+                  setFilled(next);
+                  if (next.length === item.surface.length) {
+                    const clean = ok && !slipped;
+                    setMarks((m) => m.map((v, j) => (j === i ? clean : v)));
+                    answerTurn(clean, { skill: 'vocabulary', word: item.answers[0] });
+                  }
+                }, ok ? 500 : 1400);
+              }}
+            />
+          )
+        ) : (
+          <div className="row" style={{ justifyContent: 'center', maxWidth: 'min(900px, 94vw)' }}>
+            {bank.map((chip) => (
+              <button
+                key={chip}
+                className={`chip ${wrong === chip ? 'shake' : ''}`}
+                style={wrong === chip ? { borderColor: 'var(--red)', background: 'rgba(244,68,46,.2)' } : undefined}
+                disabled={filled.includes(chip) || solved}
+                onClick={() => pick(chip)}
+              >
+                {chip}
+              </button>
+            ))}
+          </div>
+        )}
 
         {solved && <Verdict ok text={fullSentence} />}
       </div>

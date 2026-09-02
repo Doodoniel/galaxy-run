@@ -34,14 +34,25 @@ class mode, so a stand-in teacher can read the lesson straight off the projector
 
 ## Two modes
 
+Both have a teacher in them. What changes is how many pilots there are and who is holding the keyboard.
+
 | | **📽 Class** (default) | **🧑‍🚀 Solo** |
 | --- | --- | --- |
-| Who | Projector, or a shared screen in a call | One learner on their own device |
-| Pilots | 2–6 | 1 |
-| Typing | None — everything is a tap | Typing drills and the spelling round are on |
-| Speaking tasks | Timer + on-screen support, teacher awards the star | Same, self-assessed |
+| Who | 2–6 pilots round one screen: a projector, or a shared screen in a call | A one-to-one lesson; the pilot shares their own screen |
+| Pilots | 2–6, taking turns | 1 |
+| Answers | Tapped and called out loud — only one person can type | **Typed**: the word after a definition, the missing word in a sentence, the meteor correction, and the spelling drill in Memory Core |
+| Stuck? | The four choices are already on screen | **💡 Hint** reveals the four choices |
+| Speaking tasks | Timer + on-screen support, teacher awards the star | The same — the teacher is still there |
 
 Switch it on the briefing screen or from the top bar at any time.
+
+## The wrong answers are chosen, not random
+
+Every four-option question offers the answer plus three words from **its own corner of the world**: `galaxy`
+comes with *star, space, moon*; `chameleon` with *lizard, frog, snake*; `wise` with *clever, kind, funny*.
+Never the other mission words — picking `galaxy` out of `galaxy / owl / wise / travel` only tests whether a
+pilot can spot the odd one out. This holds everywhere the choices are words: Vocabulary, the Speed round,
+Memory Core, and the solo hint.
 
 ## Always available
 

@@ -13,13 +13,13 @@ const MODES: { id: Mode; icon: string; label: string; blurb: string }[] = [
     id: 'class',
     icon: '📽',
     label: 'Class',
-    blurb: 'One screen for everybody — projector or shared screen. Nobody types; the crew answers out loud.',
+    blurb: '2–6 pilots round one screen — projector or shared screen. Nobody types; the crew taps and answers out loud, taking turns.',
   },
   {
     id: 'solo',
     icon: '🧑‍🚀',
     label: 'Solo',
-    blurb: 'One learner on their own device. Typing drills and the spelling round are switched on.',
+    blurb: 'A one-to-one lesson. One pilot at their own keyboard: they type the answers instead of picking them off a list.',
   },
 ];
 
