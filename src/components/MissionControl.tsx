@@ -155,6 +155,26 @@ export function MissionControl({ open, onClose }: { open: boolean; onClose: () =
               </span>
             </label>
 
+            <div className="tile-card" style={{ ['--accent' as string]: 'var(--cyan)' }}>
+              <span className="card-label" style={{ ['--accent' as string]: 'var(--cyan)' }}>
+                Sharing your screen?
+              </span>
+              <p className="hint" style={{ margin: '4px 0 8px' }}>
+                This panel is part of the page — share this window and the crew sees it, answer keys and all. Open a
+                second window, keep it on your own screen, and share only the first. Both windows run the same
+                mission and stay in step.
+              </p>
+              <button
+                className="btn btn--sm"
+                onClick={() => {
+                  sfx.tap();
+                  window.open(`${location.pathname}${location.search}#control`, 'galaxy-run-control', 'width=560,height=940');
+                }}
+              >
+                🪟 Open a second window
+              </button>
+            </div>
+
             <button
               className="btn btn--ghost btn--sm"
               onClick={() => {

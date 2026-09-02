@@ -33,7 +33,8 @@ export default function App() {
 
 function Mission() {
   const { state, update } = useGame();
-  const [control, setControl] = useState(false);
+  // A window opened as the teacher's own console starts with the panel up.
+  const [control, setControl] = useState(() => location.hash === '#control');
   const [memory, setMemory] = useState(false);
   const [story, setStory] = useState(false);
   const full = useFullscreen();

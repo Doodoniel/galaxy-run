@@ -145,9 +145,9 @@ function load(): MissionState {
   }
 }
 
-function save(state: MissionState) {
+function save(json: string) {
   try {
-    localStorage.setItem(KEY, JSON.stringify(state));
+    localStorage.setItem(KEY, json);
   } catch {
     /* private mode, quota, disabled storage — the mission still runs */
   }
@@ -176,6 +176,8 @@ const GameContext = createContext<Ctx | null>(null);
 export function GameProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<MissionState>(load);
   const timer = useRef<number | undefined>(undefined);
+  /** The last thing this window put in storage — used to ignore its own echo. */
+  const written = useRef('');
 
   const update = useCallback((recipe: Recipe) => {
     setState((prev) => {
@@ -187,9 +189,38 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => save(state), 220);
+    timer.current = window.setTimeout(() => {
+      const json = JSON.stringify(state);
+      written.current = json;
+      save(json);
+    }, 220);
     return () => window.clearTimeout(timer.current);
   }, [state]);
+
+  /**
+   * Keep every window of the mission in step.
+   *
+   * A shared screen shows whatever is in the shared window — Mission Control
+   * included, answer keys and all. The way out is a second window the teacher
+   * keeps to themselves, and for that the two have to stay in sync. The
+   * `storage` event fires in every OTHER window of the same origin, so one
+   * window's save is another window's update, with no server in the middle.
+   */
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== KEY || !e.newValue || e.newValue === written.current) return;
+      try {
+        const incoming = JSON.parse(e.newValue) as MissionState;
+        if (incoming?.v !== 2) return;
+        written.current = e.newValue;
+        setState({ ...initialState(), ...incoming });
+      } catch {
+        /* a half-written value from another tab — the next one will be whole */
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
 
   const reset = useCallback(() => {
     localStorage.removeItem(KEY);

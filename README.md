@@ -54,6 +54,19 @@ Switch it on the briefing screen or from the top bar at any time.
   (`+1` / `−1`), the golden-rule penalty, `MAKE IT HARDER`, every answer key, and the whole plan with a jump
   to any activity.
 
+## Sharing your screen
+
+Mission Control is part of the page: share the window it is open in and the crew sees it, answer keys and all.
+The way round it costs nothing —
+
+1. In Mission Control, press **🪟 Open a second window**.
+2. Keep that window on your own screen and share only the first one (every call app can share a single window
+   or tab rather than the whole desktop).
+
+Both windows run the same mission and stay in step through the browser's own storage events — award a star,
+jump a phase or flip the mode in your window and the shared one follows within a moment. No server involved,
+and it only works between windows of the same browser on the same computer.
+
 ## How grading works
 
 Anything checkable is checked automatically: vocabulary, gap-fill, true/false, meteor corrections, Mira's
