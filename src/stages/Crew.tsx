@@ -13,13 +13,13 @@ const MODES: { id: Mode; icon: string; label: string; blurb: string }[] = [
     id: 'class',
     icon: '📽',
     label: 'Class',
-    blurb: '2–6 pilots round one screen — projector or shared screen. Nobody types; the crew taps and answers out loud, taking turns.',
+    blurb: '2–6 pilots round one screen — projector or shared screen. Tap answers, speak together and take turns. Ask for help any time.',
   },
   {
     id: 'solo',
     icon: '🧑‍🚀',
     label: 'Solo',
-    blurb: 'A one-to-one lesson. One pilot at their own keyboard: they type the answers instead of picking them off a list.',
+    blurb: 'Individual work with a teacher: type answers or use hints. Other pilots and their progress are kept.',
   },
 ];
 
@@ -33,6 +33,7 @@ export function Crew() {
 
   /** Ignition, then straight into Word Lab. */
   const launch = () => {
+    update(d => { d.turn = 0; });
     sfx.launch();
     setLaunching(true);
     window.setTimeout(next, 1250);
@@ -42,8 +43,7 @@ export function Crew() {
     update((d) => {
       d.mode = mode;
       // Solo is one pilot by definition; class needs at least two to race.
-      if (mode === 'solo') d.pilots = [d.pilots[0]];
-      else if (d.pilots.length < 2) d.pilots.push(makePilot(1));
+      d.turn = 0;
     });
 
   return (
@@ -56,7 +56,7 @@ export function Crew() {
       }
       footer={
         <button className="btn btn--lg" onClick={launch} disabled={!ready || launching}>
-          {launching ? 'Lift-off…' : ready ? '🚀 Launch' : 'Callsigns first'}
+          {launching ? 'Lift-off…' : ready ? '🚀 Start with a warm-up' : 'Callsigns first'}
         </button>
       }
     >
@@ -72,7 +72,7 @@ export function Crew() {
       >
         {/* ------------------------------------------------------ briefing */}
         <div className="tile-card" style={{ display: 'flex', flexDirection: 'column', gap: 'calc(var(--u)*.8)' }}>
-          <span className="card-label">Today’s flight</span>
+          <span className="card-label">GoGetter 2 → GoGetter 3 · summer reboot</span>
           <div className="row" style={{ flexWrap: 'nowrap', gap: 'calc(var(--u)*1)' }}>
             <img
               src={artUrl('chameleon')}
@@ -86,10 +86,10 @@ export function Crew() {
           </div>
           <div className="col" style={{ gap: 6 }}>
             {[
-              '10 new words',
-              'Read the story, then retell it',
-              'Win Galaxy Run',
-              'Pitch your own planet in 15 seconds',
+              'Warm up: hello, help and summer',
+              'Remember words and GoGetter 2 basics',
+              'Practise, repair and play together',
+              'Create a planet and invite a friend',
             ].map((t, i) => (
               <span key={t} className="pill">
                 <b style={{ color: 'var(--phase)' }}>{i + 1}</b> {t}
@@ -105,7 +105,7 @@ export function Crew() {
             {state.mode === 'class' && (
               <button
                 className="btn btn--ghost btn--sm"
-                onClick={tap(() => update((d) => void (d.pilots.length < 6 && d.pilots.push(makePilot(d.pilots.length)))))}
+                onClick={tap(() => update((d) => void (d.pilots.length < 6 && d.pilots.push(makePilot(d.pilots.length, IDEAS[d.pilots.length])))))}
                 disabled={pilots.length >= 6}
               >
                 + pilot ({pilots.length}/6)
@@ -203,7 +203,7 @@ export function Crew() {
         </div>
       )}
 
-      <Modal open={showAims} onClose={() => setShowAims(false)} title="What the pilots can do by 60:00">
+      <Modal open={showAims} onClose={() => setShowAims(false)} title="Today’s goals · with help if needed">
         <div className="col" style={{ gap: 8 }}>
           {OBJECTIVES.map((o) => (
             <div key={o.code} className="tile-card" style={{ padding: 'calc(var(--u)*.9)' }}>

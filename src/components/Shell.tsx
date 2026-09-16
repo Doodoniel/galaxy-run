@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
-import { activityOf } from '../data/lesson';
+import { activityOf, nextActivity } from '../data/lesson';
 import { useGame } from '../state/game';
 import { Rocket, tap } from './ui';
 
@@ -80,10 +80,11 @@ export function TurnBadge() {
 
 /** The "on to the next activity" button every stage ends with. */
 export function NextButton({ label, disabled }: { label?: string; disabled?: boolean }) {
-  const { next } = useGame();
+  const { next, state } = useGame();
+  const upcoming = nextActivity(state.activity);
   return (
     <button className="btn" onClick={next} disabled={disabled}>
-      {label ?? 'Next'} →
+      {label ?? (upcoming ? activityOf(upcoming).title : 'Finish')} →
     </button>
   );
 }

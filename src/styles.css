@@ -1450,3 +1450,45 @@ input {
     break-after: auto;
   }
 }
+/* Summer reboot: keep the original palette, planets and all artwork. */
+.bridge-grid { display:grid; grid-template-columns:minmax(180px,.65fr) minmax(320px,1.35fr); gap:clamp(18px,3vw,48px); width:min(1120px,100%); align-items:center; }
+.bridge-grid .col { gap:12px; }
+.bridge-art { width:min(290px,30vh); max-width:100%; }
+.bridge-model { font-family:var(--font-display); font-size:clamp(20px,3.2vh,32px); line-height:1.35; }
+.bridge-grid p { margin:6px 0; }
+.bridge-summary { max-width:850px; text-align:center; }
+.rubric-row { display:flex; align-items:center; gap:12px; padding:10px; border:1px solid var(--card-line); border-radius:12px; }
+.rubric-row input { width:22px; height:22px; flex:none; }
+.reflection-row { display:grid; grid-template-columns:1fr 160px; gap:12px; align-items:center; }
+textarea.field { width:100%; resize:vertical; min-height:100px; font:inherit; }
+select.field { color:var(--ink); background:#211136; }
+summary { cursor:pointer; color:var(--cyan); padding:6px 0; }
+button:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus-visible, select:focus-visible { outline:3px solid var(--cyan); outline-offset:4px; }
+.chip[aria-pressed='true'] { background:#62378b; border-color:var(--yellow); color:white; }
+.stage__body { overflow-y:auto; overflow-x:hidden; align-items:safe center; scrollbar-width:thin; padding:4px; }
+.stage__body > * { max-height:none; }
+.stage__top { flex-wrap:wrap; }
+.stage__say { color:var(--ink-soft); }
+@media (max-width:760px) {
+  .topbar { flex-wrap:wrap; gap:6px; }
+  .phasemap { order:3; flex:1 0 100%; justify-content:center; }
+  .phasemap__label { display:block; font-size:11px; }
+  .actbar { flex-wrap:wrap; }
+  .actbar__tabs { overflow-x:auto; max-width:100%; }
+  .actbar__crew { flex-basis:100%; justify-content:flex-start; }
+  .bridge-grid, .split { grid-template-columns:1fr !important; height:auto !important; }
+  .bridge-art { width:130px; }
+  .stage__body { place-items:start center; }
+  .stage__foot { flex-wrap:wrap; }
+  .stage__say { flex-basis:100%; font-size:12px; }
+  .stage__foot .stage__gap { display:none; }
+  .reflection-row { grid-template-columns:1fr; }
+  .btn,.opt { min-height:42px; }
+  .planet-mission > .center svg { width:130px; height:130px; }
+}
+@media print {
+  .stage:has(.certificate) { display:block !important; }
+  .stage:has(.certificate) > .stage__top, .stage:has(.certificate) > .stage__foot { display:none !important; }
+  .stage:has(.certificate) .stage__body { display:block; overflow:visible; }
+  .stage:has(.certificate) .stage__body > :not(.scrim) { display:none !important; }
+}

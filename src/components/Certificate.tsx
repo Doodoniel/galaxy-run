@@ -25,8 +25,8 @@ export function Certificate({ pilot, date }: { pilot: Pilot; date: string }) {
   return (
     <article className="certificate">
       <header className="certificate__head">
-        <span className="certificate__brand">New School Galaxy · Mission 01</span>
-        <h2>Pilot’s Certificate</h2>
+        <span className="certificate__brand">Galaxy Run · GoGetter 2 summer reboot</span>
+        <h2>Pilot’s Learning Record</h2>
       </header>
 
       <div className="certificate__hero">
@@ -44,7 +44,7 @@ export function Certificate({ pilot, date }: { pilot: Pilot; date: string }) {
       </div>
 
       <div className="certificate__stats">
-        <Stat big={`${pilot.stars}`} label="stars for speaking" icon={<Star size={15} />} />
+        <Stat big={`${pilot.stars}`} label="participation stars" icon={<Star size={15} />} />
         <Stat big={pilot.place ? `#${pilot.place}` : '—'} label="place in the race" />
         <Stat big={`${pilot.best}/10`} label="words in 60 seconds" />
         <Stat big={acc.total ? `${acc.right}/${acc.total}` : '—'} label="questions right" />
@@ -94,7 +94,7 @@ export function Certificate({ pilot, date }: { pilot: Pilot; date: string }) {
           </ul>
         ) : (
           <p className="certificate__clean">
-            Say the ten mission words out loud at home, and record your fifteen-second planet pitch.
+            Practise two words and write 3–5 sentences about your planet.
           </p>
         )}
       </section>
@@ -112,7 +112,7 @@ export function Certificate({ pilot, date }: { pilot: Pilot; date: string }) {
 
       <footer className="certificate__foot">
         <span>Teacher ______________________</span>
-        <span>Mission 02 — next flight</span>
+        <span>Classroom practice record · not CEFR certification</span>
       </footer>
     </article>
   );

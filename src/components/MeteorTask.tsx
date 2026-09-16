@@ -43,6 +43,7 @@ export function MeteorTask({
   };
 
   const pickFix = (opt: string) => {
+    if (chosen) return;
     setChosen(opt);
     if (opt === card.fix) {
       sfx.meteor();
@@ -123,7 +124,7 @@ export function MeteorTask({
                 key={o}
                 className="opt"
                 data-state={chosen === o ? (o === card.fix ? 'right' : 'wrong') : undefined}
-                disabled={chosen === card.fix}
+                disabled={chosen !== null}
                 onClick={() => pickFix(o)}
                 style={{ justifyContent: 'center' }}
               >

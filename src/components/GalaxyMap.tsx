@@ -22,6 +22,7 @@ export function PhaseMap() {
           <button
             key={p.id}
             className="phasemap__node"
+            aria-current={active ? "step" : undefined}
             data-active={active}
             data-done={done}
             style={{ ['--phase' as string]: p.colour }}
@@ -35,7 +36,7 @@ export function PhaseMap() {
               <Planet look={p.planet} size={active ? 46 : 34} glow={active} />
               {done && !active && <span className="phasemap__tick">✓</span>}
             </span>
-            <span className="phasemap__label">{p.stage}</span>
+            <span className="phasemap__label">{({leadin:'Get ready', presentation:'Remember', practice:'Try it', production:'Create', feedback:'Celebrate'})[p.id]}</span>
           </button>
         );
       })}

@@ -223,6 +223,8 @@ export function CountdownRing({
 }) {
   const [left, setLeft] = useState(seconds);
   const done = useRef(false);
+  const onDoneRef = useRef(onDone);
+  onDoneRef.current = onDone;
 
   useEffect(() => {
     setLeft(seconds);
@@ -239,7 +241,7 @@ export function CountdownRing({
       if (next <= 0 && !done.current) {
         done.current = true;
         window.clearInterval(id);
-        onDone?.();
+        onDoneRef.current?.();
       }
     }, 100);
     return () => window.clearInterval(id);
@@ -294,6 +296,8 @@ export function CountdownRing({
 export function Verdict({ ok, text }: { ok: boolean; text: string }) {
   return (
     <div
+      role="status"
+      aria-live="polite"
       className="pop"
       style={{
         display: 'flex',
@@ -308,7 +312,7 @@ export function Verdict({ ok, text }: { ok: boolean; text: string }) {
         fontSize: 'clamp(13px, 1.9vh, 18px)',
       }}
     >
-      <span>{ok ? '✅' : '☄️'}</span>
+      <span aria-hidden="true">{ok ? '✅' : '☄️'}</span>
       <span>{text}</span>
     </div>
   );

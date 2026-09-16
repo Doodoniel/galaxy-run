@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { GAP_FILL, METEOR_CARDS, MIRA_CARDS, TRUE_FALSE, WORDS } from '../data/content';
 import { PHASES, activityOf, phaseOf } from '../data/lesson';
+import { PRACTICE } from '../data/bridge';
 import { useGame, type Mode } from '../state/game';
 import { Rocket, Star, tap } from './ui';
 import { sfx } from '../lib/audio';
@@ -52,6 +53,8 @@ export function MissionControl({ open, onClose }: { open: boolean; onClose: () =
           </button>
         </div>
 
+        <p><a className="btn btn--sm" href="./teacher-guide.html" target="_blank" rel="noreferrer">📋 Сценарий урока · RU</a></p>
+        <p className="hint">GoGetter 2 revision → GoGetter 3. A1–A2 practice; course alignment, not a level certificate. See the guide for sources and adaptations.</p>
         {/* lesson clock */}
         <div className="tile-card" style={{ marginTop: 'calc(var(--u)*.9)' }}>
           <div className="row" style={{ justifyContent: 'space-between' }}>
@@ -125,16 +128,7 @@ export function MissionControl({ open, onClose }: { open: boolean; onClose: () =
                   >
                     −1
                   </button>
-                  <button
-                    className="btn btn--bad btn--sm"
-                    title="Russian on your turn — the rocket goes back one tile"
-                    onClick={() => {
-                      sfx.wrong();
-                      update((d) => void (d.pilots[i].pos = Math.max(0, d.pilots[i].pos - 1)));
-                    }}
-                  >
-                    Golden rule −1
-                  </button>
+                  <span className="hint">Help is welcome. Model the English and let the pilot try again.</span>
                 </div>
                 <div className="hint" style={{ marginTop: 5 }}>
                   tile {p.pos}/20 · shields {p.shields} · speed {p.best}/10
@@ -191,6 +185,9 @@ export function MissionControl({ open, onClose }: { open: boolean; onClose: () =
         {/* ------------------------------------------------------- keys */}
         {tab === 'keys' && (
           <div className="col" style={{ gap: 8 }}>
+            <Key title="Power up · GoGetter 2 review">
+              {PRACTICE.map((q, i) => <p key={q.id}><b>{i + 1}. {q.answer}</b> — {q.why}</p>)}
+            </Key>
             <Key title="Words & meanings">
               {WORDS.map((w, i) => (
                 <div key={w.id}>

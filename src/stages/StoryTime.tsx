@@ -27,6 +27,7 @@ export function StoryTime() {
 function Read({ onDone }: { onDone: () => void }) {
   const { state, update } = useGame();
   const [i, setI] = useState(0);
+  const [showText,setShowText] = useState(true);
 
   const last = i === STORY_SENTENCES.length - 1;
   const marks = STORY_SENTENCES.map((_, n) => (n < state.story.heard ? true : null));
@@ -110,10 +111,11 @@ function Read({ onDone }: { onDone: () => void }) {
               lineHeight: 1.28,
             }}
           >
-            {STORY_SENTENCES[i]}
+            {showText ? STORY_SENTENCES[i] : 'Listen: what happens to Richie?'}
           </p>
 
-          <div>
+          <div className="btn-row">
+            <button className="btn btn--ghost btn--sm" onClick={() => setShowText(!showText)}>{showText ? 'Hide text · listen first' : 'Show text · check'}</button>
             <button
               className="btn btn--ghost btn--sm"
               onClick={() => speak(STORY_SENTENCES[i], { rate: 0.86 })}

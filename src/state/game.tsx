@@ -44,6 +44,9 @@ export interface PlanetSheet extends PlanetLook {
   /** Three mission words the visitor learns there — picked, never typed. */
   words: WordId[];
   pitched: boolean;
+  notes?: string;
+  reflection?: number[];
+  criteria?: boolean[];
 }
 
 /**
@@ -153,7 +156,7 @@ const initialState = (): MissionState => ({
   mode: 'class',
   activity: 'crew',
   done: [],
-  pilots: [makePilot(0), makePilot(1)],
+  pilots: [makePilot(0, 'Nova'), makePilot(1, 'Comet')],
   turn: 0,
   hard: false,
   muted: false,
@@ -281,7 +284,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const reset = useCallback(() => {
-    localStorage.removeItem(KEY);
+    try { localStorage.removeItem(KEY); } catch { /* storage can be unavailable */ }
     setState(initialState());
   }, []);
 

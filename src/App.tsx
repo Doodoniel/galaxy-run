@@ -8,6 +8,9 @@ import { ActivityBar, PhaseMap } from './components/GalaxyMap';
 import { MissionControl } from './components/MissionControl';
 import { StoryBook } from './components/StoryBook';
 import { useFullscreen } from './components/Shell';
+import { Warmup } from './stages/Warmup';
+import { Recall, BridgePractice } from './stages/Recall';
+import { FlightHelp } from './components/FlightHelp';
 import { Crew } from './stages/Crew';
 import { WordCards } from './stages/WordCards';
 import { StoryTime } from './stages/StoryTime';
@@ -54,7 +57,7 @@ function Mission() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName)) return;
       const k = e.key.toLowerCase();
       if (k === 't') setControl((c) => !c);
       if (k === 'm') setMemory((m) => !m);
@@ -71,16 +74,17 @@ function Mission() {
 
       <header className="topbar">
         <span className="brand">
-          <b>Galaxy Run</b> Mission 01
+          <b>Galaxy Run</b> Summer reboot
         </span>
 
         <PhaseMap />
+        <FlightHelp />
         <span className="grow" />
 
         <button
           className="btn btn--ghost btn--sm"
           onClick={tap(() => update((d) => void (d.mode = d.mode === 'class' ? 'solo' : 'class')))}
-          title="Class = 2–6 pilots on one screen, tapping. Solo = one-to-one, the pilot types."
+          title="Class: tap answers. Solo: type answers with hints. Pilots and progress are kept."
         >
           {state.mode === 'class' ? '📽' : '🧑‍🚀'} <span className="hide-sm">{state.mode}</span>
         </button>
@@ -122,8 +126,8 @@ function Mission() {
           {state.muted ? '🔇' : '🔊'}
         </button>
 
-        <button className="icon-btn" onClick={() => setControl(true)} title="Mission control (T)" aria-label="Mission control">
-          🛰
+        <button className="btn btn--ghost btn--sm" onClick={() => setControl(true)} title="Mission control (T)" aria-label="Mission control">
+          🛰 Teacher
         </button>
       </header>
 
@@ -133,6 +137,9 @@ function Mission() {
         <MemoryCore onClose={() => setMemory(false)} />
       ) : (
         <>
+          {state.activity === 'warmup' && <Warmup />}
+          {state.activity === 'recall' && <Recall />}
+          {state.activity === 'reboot' && <BridgePractice />}
           {state.activity === 'crew' && <Crew />}
           {state.activity === 'words' && <WordCards />}
           {state.activity === 'story' && <StoryTime />}

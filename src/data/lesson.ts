@@ -12,6 +12,9 @@
 export type PhaseId = 'leadin' | 'presentation' | 'practice' | 'production' | 'feedback';
 
 export type ActivityId =
+  | 'warmup'
+  | 'recall'
+  | 'reboot'
   | 'crew'
   | 'words'
   | 'story'
@@ -53,123 +56,166 @@ export interface Phase {
 
 export const PHASES: Phase[] = [
   {
-    id: 'leadin',
-    stage: 'Lead-in',
-    title: 'Mission Briefing',
-    aim: 'Set the frame, hand out callsigns, English from the first second.',
-    minutes: '0–4',
-    colour: '#4fc3f7',
-    planet: { type: 'icy', hue: 195, moons: 1 },
-    activities: [
+    "id": "leadin",
+    "stage": "Lead-in",
+    "title": "Welcome back",
+    "aim": "Feel safe, reconnect and ask for help in English.",
+    "minutes": "0–8",
+    "colour": "#4fc3f7",
+    "planet": {
+      "type": "icy",
+      "hue": 195,
+      "moons": 1
+    },
+    "activities": [
       {
-        id: 'crew',
-        title: 'Crew',
-        sub: 'Callsigns, rockets, and what today is about',
-        minutes: '0–4',
-        says: '“Welcome back, pilots! This is not a lesson. This is Mission 01. You need a callsign — a cool English nickname. Sixty seconds. Go!”',
+        "id": "crew",
+        "title": "Crew",
+        "sub": "Choose a nickname and an answer mode",
+        "minutes": "0–2",
+        "says": "Welcome back! Today we wake up our English. Mistakes are welcome."
       },
-    ],
+      {
+        "id": "warmup",
+        "title": "Radio check",
+        "sub": "Hello → introductions → ask for help → one summer memory",
+        "minutes": "2–8",
+        "says": "Ask your partner. Listen, answer, then ask: And you?"
+      }
+    ]
   },
   {
-    id: 'presentation',
-    stage: 'Presentation',
-    title: 'Word Lab & Story',
-    aim: 'Meet the ten words, then meet them again inside a story.',
-    minutes: '4–20',
-    colour: '#a855f7',
-    planet: { type: 'banded', hue: 275, ring: true },
-    activities: [
+    "id": "presentation",
+    "stage": "Presentation",
+    "title": "Remember together",
+    "aim": "Reconnect meaning, form and pronunciation before asking for accuracy.",
+    "minutes": "8–25",
+    "colour": "#a855f7",
+    "planet": {
+      "type": "banded",
+      "hue": 275,
+      "ring": true
+    },
+    "activities": [
       {
-        id: 'words',
-        title: 'Ten words',
-        sub: 'Picture → word → drill → concept check',
-        minutes: '4–14',
-        says: '“Card one. What is it? … It’s a chameleon. Everybody: chameleon. Again, louder. Now whisper it.”',
+        "id": "words",
+        "title": "Word lab",
+        "sub": "Guess, reveal, listen and say. Space words are story support.",
+        "minutes": "8–14",
+        "says": "Look at the picture. Any ideas? Listen. Say it like a friendly robot!"
       },
       {
-        id: 'story',
-        title: 'The story',
-        sub: 'Listen with no text, then retell it from the pictures',
-        minutes: '14–20',
-        says: '“Listen. No text, no writing — just listen. Then you tell the story back from the pictures.”',
+        "id": "story",
+        "title": "Richie’s story",
+        "sub": "Read or listen, then retell with pictures",
+        "minutes": "14–18",
+        "says": "Why does Richie want English? Listen for his dream. Then check the pictures."
       },
-    ],
+      {
+        "id": "recall",
+        "title": "Memory reboot",
+        "sub": "Six short examples: habits, now, food, comparisons, past and plans",
+        "minutes": "18–25",
+        "says": "Let’s remember together. Look at the time word. What does the sentence mean?"
+      }
+    ]
   },
   {
-    id: 'practice',
-    stage: 'Controlled practice',
-    title: 'Check & Drill',
-    aim: 'Accuracy first — meaning, then form, then speed.',
-    minutes: '20–36',
-    colour: '#3fbf5a',
-    planet: { type: 'rocky', hue: 130, moons: 2 },
-    activities: [
+    "id": "practice",
+    "stage": "Practice",
+    "title": "Repair & play",
+    "aim": "Supported retrieval with explanations. Board tasks are mixed practice, not free production.",
+    "minutes": "25–44",
+    "colour": "#3fbf5a",
+    "planet": {
+      "type": "rocky",
+      "hue": 130,
+      "moons": 2
+    },
+    "activities": [
       {
-        id: 'vocab',
-        title: 'Vocabulary',
-        sub: 'Meanings, then the words back in sentences',
-        minutes: '20–26',
-        says: '“Which word means this? … Now put the missing word back into the sentence.”',
+        "id": "vocab",
+        "title": "Words in use",
+        "sub": "Meaning and gap-fill; use hints when needed",
+        "minutes": "25–28",
+        "says": "Choose the word, then say the whole sentence."
       },
       {
-        id: 'check',
-        title: 'Story check',
-        sub: 'True or false, then destroy the meteors',
-        minutes: '26–32',
-        says: '“True or false? … Careful: every meteor sentence has exactly one mistake. Find it, fix it.”',
+        "id": "check",
+        "title": "Story & meteors",
+        "sub": "Check meaning and repair sentences",
+        "minutes": "28–31",
+        "says": "Find the mistake. Use the example if you need help."
       },
       {
-        id: 'speed',
-        title: 'Speed round',
-        sub: 'Sixty seconds, ten words, one pilot at a time',
-        minutes: '32–36',
-        says: '“Sixty seconds. Ten words. Shout it out. Ready? Go!”',
+        "id": "reboot",
+        "title": "Power up",
+        "sub": "Twelve GoGetter 2 review questions with feedback and repair",
+        "minutes": "31–37",
+        "says": "Think first. Choose an answer. Explain it together. Mistakes help us choose what to practise."
       },
-    ],
+      {
+        "id": "speed",
+        "title": "Word boost",
+        "sub": "Optional: ten pictures, with or without a timer",
+        "minutes": "Optional",
+        "says": "Choose relaxed practice or a timed challenge. Both are good practice."
+      },
+      {
+        "id": "run",
+        "title": "Galaxy Run",
+        "sub": "Roll → read the task → speak or answer → next pilot",
+        "minutes": "37–44",
+        "says": "Let’s play a few rounds. Help each other. We can finish the game another day."
+      }
+    ]
   },
   {
-    id: 'production',
-    stage: 'Production',
-    title: 'Now Speak',
-    aim: 'Free speaking: the words and the grammar go into the pilots’ own mouths.',
-    minutes: '36–58',
-    colour: '#ffc93c',
-    planet: { type: 'lava', hue: 28, ring: true, moons: 1 },
-    activities: [
+    "id": "production",
+    "stage": "Production",
+    "title": "Create your adventure",
+    "aim": "Use English for an original message, exchange information and make a shared choice.",
+    "minutes": "44–56",
+    "colour": "#ffc93c",
+    "planet": {
+      "type": "lava",
+      "hue": 28,
+      "ring": true,
+      "moons": 1
+    },
+    "activities": [
       {
-        id: 'run',
-        title: 'Galaxy Run',
-        sub: 'The board race — describe, fix, answer, speak 15 seconds',
-        minutes: '36–53',
-        says: '“Purple — describe a word. Red — fix a mistake. Green owl — answer about Richie. Yellow — speak fifteen seconds.”',
-      },
-      {
-        id: 'planet',
-        title: 'My planet',
-        sub: 'Design a planet and sell it to Richie in 15 seconds',
-        minutes: '53–58',
-        says: '“Richie visits your planet next. Design it, name it — then sell it to him. Look up. Smile. Loud.”',
-      },
-    ],
+        "id": "planet",
+        "title": "My planet",
+        "sub": "Design → prepare → invite → ask → choose a visit",
+        "minutes": "44–56",
+        "says": "Your planet, your ideas. Invite a visitor. They ask a question and choose where to go."
+      }
+    ]
   },
   {
-    id: 'feedback',
-    stage: 'Feedback',
-    title: 'Landing',
-    aim: 'Make the result visible: stars, MVP, what each pilot can now do.',
-    minutes: '58–60',
-    colour: '#ff5cc8',
-    planet: { type: 'ringed', hue: 320, ring: true, moons: 2 },
-    activities: [
+    "id": "feedback",
+    "stage": "Feedback",
+    "title": "Celebrate & reflect",
+    "aim": "Separate game rewards from learning evidence. Identify one next step.",
+    "minutes": "56–60",
+    "colour": "#ff5cc8",
+    "planet": {
+      "type": "ringed",
+      "hue": 320,
+      "ring": true,
+      "moons": 2
+    },
+    "activities": [
       {
-        id: 'report',
-        title: 'Mission report',
-        sub: 'Stars, MVP, word check, homework',
-        minutes: '58–60',
-        says: '“Pilots, count your stars. Mission 01 complete. Next time we fly to planet two.”',
-      },
-    ],
-  },
+        "id": "report",
+        "title": "Mission report",
+        "sub": "Personal results, can-do reflection and a small next step",
+        "minutes": "56–60",
+        "says": "What can you say now? What helped you? Choose one thing to practise next."
+      }
+    ]
+  }
 ];
 
 export const ALL_ACTIVITIES: ActivityId[] = PHASES.flatMap((p) => p.activities.map((a) => a.id));
@@ -208,9 +254,9 @@ export const PITCH_FRAME: { text: string; gap: string | null }[] = [
  * ------------------------------------------------------------------ */
 
 export const OBJECTIVES = [
-  { code: 'Vocabulary', text: '10 new words: recognise them, say them, use them in a sentence.' },
-  { code: 'Reading', text: 'Understand a short illustrated story and check true / false statements.' },
-  { code: 'Listening', text: 'Follow a 6-sentence story without the text and retell it from pictures.' },
-  { code: 'Grammar', text: 'Present Simple -s, is / are, want + to + verb, a / plural.' },
-  { code: 'Speaking', text: 'Talk for 15 seconds on a familiar topic without stopping.' },
+{code:'Words',text:'Recognise story words and reuse familiar GoGetter 2 language with support.'},
+{code:'Meaning',text:'Understand the main idea and details in a short illustrated story.'},
+{code:'Grammar',text:'Recall routines, actions now, quantities, comparisons, past events and plans.'},
+{code:'Interaction',text:'Ask for help, invite a visitor, ask and answer a follow-up question.'},
+{code:'Production',text:'Describe an imaginary planet, share a past event and make a plan; then write 3–5 sentences.'},
 ];

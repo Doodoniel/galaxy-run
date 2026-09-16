@@ -116,6 +116,7 @@ function Meteors({ carried, onBack }: { carried: number; onBack: () => void }) {
   const [i, setI] = useState(0);
   const [burst, setBurst] = useState(0);
   const [cleared, setCleared] = useState(0);
+  const [cleanCount, setCleanCount] = useState(0);
 
   const last = i === CHECK_METEORS.length - 1;
   const done = cleared >= CHECK_METEORS.length;
@@ -123,12 +124,13 @@ function Meteors({ carried, onBack }: { carried: number; onBack: () => void }) {
   useEffect(() => {
     if (!done) return;
     sfx.fanfare();
-    finish('check', { right: carried + cleared, total: TRUE_FALSE.length + CHECK_METEORS.length });
+    finish('check', { right: carried + cleanCount, total: TRUE_FALSE.length + CHECK_METEORS.length });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [done]);
 
   const solved = (clean: boolean) => {
-    answerTurn(clean, { skill: 'grammar', rule: CHECK_METEORS[i].rule });
+    answerTurn(clean, { skill: CHECK_METEORS[i].rule === 'read the text carefully' ? 'comprehension' : 'grammar', rule: CHECK_METEORS[i].rule });
+    if (clean) setCleanCount(n => n + 1);
     setBurst((b) => b + 1);
     setCleared((c) => c + 1);
     window.setTimeout(() => {
@@ -149,7 +151,7 @@ function Meteors({ carried, onBack }: { carried: number; onBack: () => void }) {
           </button>
         </div>
       }
-      footer={done ? <NextButton label="To the speed round" /> : undefined}
+      footer={done ? <NextButton label="Memory reboot practice" /> : undefined}
     >
       <StarBurst fire={burst} />
       {done ? (
@@ -168,6 +170,7 @@ function Meteors({ carried, onBack }: { carried: number; onBack: () => void }) {
             onClick={tap(() => {
               setI(0);
               setCleared(0);
+              setCleanCount(0);
             })}
           >
             Run the storm again

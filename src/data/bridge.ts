@@ -1,0 +1,29 @@
+export const RECALL = [
+  { id: 'routine', title: 'Every day', image: 'chameleon', model: 'Richie visits a planet every day. He does not travel alone.', rule: 'I / you / we / they + visit. He / she / it + visits. Does he visit? Yes, he does.', meaning: 'A habit or something that is usually true.', ru: 'Обычно, каждый день: Present Simple. С he / she / it добавляем -s. После does — глагол без -s.', question: 'Is this a habit or an action happening now?', answer: 'A habit.', options: ['A habit.', 'An action happening now.'] },
+  { id: 'now', title: 'Right now', image: 'spaceship', model: 'Look! Richie is flying. His friends are waiting.', rule: 'am / is / are + verb-ing. Is he flying? Yes, he is.', meaning: 'An action happening now. Compare: he flies every day / he is flying now.', ru: 'Прямо сейчас: am / is / are + глагол с -ing. He is flying — он сейчас летит.', question: 'Is Richie flying now or every day in this sentence?', answer: 'Now.', options: ['Every day.', 'Now.'] },
+  { id: 'food', title: 'Pack a space picnic', image: 'adventure', model: 'There are some apples. There is some water. There is not any milk.', rule: 'some in positive sentences; any in most negatives and questions. How many apples? How much water?', meaning: 'Apples can be counted. Water is uncountable. Can I have some water, please? — a polite request.', ru: 'Яблоки считаем: many apples. Воду не считаем по штукам: much water. Some — в утверждениях и вежливых просьбах; any — обычно в вопросах и отрицаниях.', question: 'Which question asks about water?', answer: 'How much water?', options: ['How many water?', 'How much water?'] },
+  { id: 'compare', title: 'Choose a planet', image: 'planet', model: 'Nova is colder than Earth. It is the coldest planet on our map.', rule: 'cold → colder → the coldest; big → bigger → the biggest; beautiful → more beautiful → the most beautiful.', meaning: 'Compare two places, or choose one from a whole group.', ru: 'Сравниваем два: colder than. Выделяем из группы: the coldest. Good → better → the best.', question: '“Colder than Earth” compares how many places?', answer: 'Two.', options: ['Two.', 'Only one.'] },
+  { id: 'past', title: 'Summer memories', image: 'travel', model: 'Yesterday Richie was on Nova. He visited Mira and went swimming.', rule: 'visit → visited; go → went; is → was; are → were. Did he go? He did not go. After did, use go, not went.', meaning: 'A finished action: yesterday, last week, last summer.', ru: 'Прошлое: was / were, visited, went. В вопросах и отрицаниях did + начальная форма: Did you go? I did not go.', question: 'Is the visit finished or a plan?', answer: 'Finished.', options: ['A plan.', 'Finished.'] },
+  { id: 'plans', title: 'The next adventure', image: 'dream', model: 'Tomorrow we are going to visit Nova. Are you going to come?', rule: 'am / is / are + going to + verb. I am going to travel. She is going to travel.', meaning: 'A future plan or intention. Invite someone: Would you like to come? — Yes, I would love to!', ru: 'Планы: am / is / are going to + глагол. Приглашение: Would you like to come? — Yes, I would love to!', question: 'Is “tomorrow” in the past or the future?', answer: 'The future.', options: ['The past.', 'The future.'] },
+];
+
+export const PRACTICE = [
+  { id:'r1', topic:'routine', text:'Every day, Richie ___ English.', answer:'learns', options:['learns','learn','is learning'], why:'Every day is a routine. Richie = he, so learn + s.' },
+  { id:'r2', topic:'now', text:'Look! The pilots ___ into the spaceship.', answer:'are getting', options:['get','is getting','are getting'], why:'Look! tells us it is happening now. The pilots = they: are + getting.' },
+  { id:'r3', topic:'food', text:'We have ___ apples, but we do not have any milk.', answer:'some', options:['any','some','much'], why:'Use some in this positive sentence. Apples are countable.' },
+  { id:'r4', topic:'compare', text:'Nova is small. Earth is big. Earth is ___ Nova.', answer:'bigger than', options:['the biggest','biger than','bigger than'], why:'Compare two planets: big → bigger + than. Double the final g.' },
+  { id:'r5', topic:'past', text:'Yesterday Richie ___ to the beach.', answer:'went', options:['goes','went','go'], why:'Yesterday is finished. The past of go is went.' },
+  { id:'r6', topic:'plans', text:'Tomorrow Mira ___ going to visit us.', answer:'is', options:['is','are','does'], why:'Mira = she: she is going to + visit.' },
+  { id:'r7', topic:'routine', text:'___ Richie like adventures?', answer:'Does', options:['Is','Do','Does'], why:'Present Simple question with he: Does + subject + base verb?' },
+  { id:'r8', topic:'now', text:'Mira usually reads at home, but now she ___ with Richie.', answer:'is travelling', options:['travels','is travelling','travel'], why:'Now contrasts with usually. She is travelling at this moment.' },
+  { id:'r9', topic:'food', text:'How ___ water do we need for the trip?', answer:'much', options:['many','any','much'], why:'Water is uncountable: How much water? Compare: How many bottles?' },
+  { id:'r10', topic:'compare', text:'There are three planets. Nova is ___ of the three.', answer:'the coldest', options:['colder than','the coldest','coldest than'], why:'One planet in a group: the + superlative, the coldest.' },
+  { id:'r11', topic:'past', text:'Did you ___ swimming last summer?', answer:'go', options:['went','going','go'], why:'Did already marks the past. Use the base form go after did.' },
+  { id:'r12', topic:'plans', text:'Would you like to visit my planet?', answer:'Yes, I would love to!', options:['Yes, I would love to!','Yes, I went yesterday.','Yes, I do every day.'], why:'This is an invitation. Accept it politely: Yes, I would love to!' },
+];
+
+export const CAN_DO = [
+  'I can describe my planet and compare it with another place.',
+  'I can say what happened and what I am going to do next.',
+  'I can ask a question, answer a visitor and choose a trip.',
+];

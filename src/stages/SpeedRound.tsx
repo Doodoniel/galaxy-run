@@ -1,175 +1,38 @@
-import { useState } from 'react';
-import { WORDS, type Word } from '../data/content';
+import { useEffect, useRef, useState } from 'react';
+import { WORDS } from '../data/content';
 import { useGame } from '../state/game';
 import { NextButton, Stage } from '../components/Shell';
-import { CountdownRing, Star, StarBurst, WordArt, shuffle, tap } from '../components/ui';
-import { sfx, speak } from '../lib/audio';
+import { CountdownRing, WordArt, shuffle, Verdict } from '../components/ui';
+import { sfx } from '../lib/audio';
 
-interface Question {
-  word: Word;
-  options: string[];
-}
-
-function buildQueue(): Question[] {
-  const out: Question[] = [];
-  for (let r = 0; r < 6; r++) {
-    for (const w of shuffle(WORDS, Math.random())) {
-      out.push({ word: w, options: shuffle([w.word, ...w.neighbours], Math.random()) });
-    }
-  }
-  return out;
-}
-
-/**
- * Sixty seconds, ten words on repeat, one pilot at a time. The score is the
- * crew record from the printed plan — the group beats its own number next
- * mission, which is what turns vocabulary into a serial.
- */
 export function SpeedRound() {
-  const { state, update, finish, flagWord, passTurn } = useGame();
-  const pilot = state.turn % Math.max(1, state.pilots.length);
-  const [phase, setPhase] = useState<'ready' | 'run' | 'over'>('ready');
-  const [queue, setQueue] = useState<Question[]>([]);
-  const [at, setAt] = useState(0);
-  const [score, setScore] = useState(0);
-  const [misses, setMisses] = useState(0);
-  const [flash, setFlash] = useState<'ok' | 'no' | null>(null);
-  const [burst, setBurst] = useState(0);
-  const [runKey, setRunKey] = useState(0);
-
-  const p = state.pilots[pilot];
-  const current = queue[at];
-  const record = Math.max(0, ...state.pilots.map((x) => x.best));
-
-  const start = () => {
-    setQueue(buildQueue());
-    setAt(0);
-    setScore(0);
-    setMisses(0);
-    setRunKey((k) => k + 1);
-    setPhase('run');
-    sfx.launch();
+  const {state,update,finish,flagWord,passTurn}=useGame();
+  const [phase,setPhase]=useState<'ready'|'run'|'over'>('ready');
+  const [timed,setTimed]=useState(false);
+  const [queue,setQueue]=useState(()=>shuffle(WORDS));
+  const [at,setAt]=useState(0);
+  const [score,setScore]=useState(0);
+  const [given,setGiven]=useState('');
+  const [run,setRun]=useState(0);
+  const [owner,setOwner]=useState(0);
+  const settled=useRef(false);
+  const busy=useRef(false);
+  const word=queue[at];
+  const options=shuffle([word.word,...word.neighbours],at*.153+run*.021);
+  const start=()=>{setOwner(state.turn%state.pilots.length);setQueue(shuffle(WORDS));setAt(0);setScore(0);setGiven('');setRun(r=>r+1);setPhase('run');settled.current=false;busy.current=false;};
+  const stop=()=>{
+    if(settled.current)return;
+    settled.current=true;setPhase('over');sfx.star();
+    if(timed) update(d=>{if(d.pilots[owner])d.pilots[owner].best=Math.max(d.pilots[owner].best,score);});
+    finish('speed',{right:score,total:at+(given?1:0)});
   };
-
-  const answer = (choice: string) => {
-    if (phase !== 'run' || !current) return;
-    if (choice === current.word.word) {
-      sfx.right();
-      setScore((s) => s + 1);
-      setFlash('ok');
-    } else {
-      sfx.wrong();
-      setMisses((m) => m + 1);
-      setFlash('no');
-      flagWord(current.word.id);
-      speak(current.word.word);
-    }
-    window.setTimeout(() => setFlash(null), 160);
-    setAt((a) => a + 1);
-  };
-
-  const stop = () => {
-    setPhase('over');
-    sfx.fanfare();
-    if (score > (p?.best ?? 0)) {
-      setBurst((b) => b + 1);
-      update((d) => void (d.pilots[pilot].best = score));
-    }
-    finish('speed', { right: score, total: 10 });
-  };
-
-  return (
-    <Stage
-      title="Speed round"
-      step={phase === 'run' ? `${score} correct` : `record ${record} / 10`}
-      turn
-      footer={phase === 'over' ? <NextButton label="To Galaxy Run" /> : undefined}
-    >
-      <StarBurst fire={burst} />
-
-      {phase === 'ready' && (
-        <div className="center">
-          <h2 className="q">Sixty seconds. Ten words.</h2>
-          <p className="hint" style={{ maxWidth: 560 }}>
-            <b style={{ color: 'var(--ink)' }}>{p?.callsign}</b> — look at the picture and tap the English word. Say
-            it out loud at the same time; the crew is listening.
-          </p>
-          <button className="btn btn--lg" onClick={start}>
-            Go!
-          </button>
-        </div>
-      )}
-
-      {/* One centred column: clock, picture, answers — all on the same axis,
-          so nothing sits off to one side on a projector. */}
-      {phase === 'run' && current && (
-        <div className="center" style={{ width: '100%' }}>
-          <div className="row" style={{ justifyContent: 'center', gap: 'calc(var(--u)*1.4)' }}>
-            <CountdownRing seconds={60} running runKey={runKey} onDone={stop} size={92} />
-            <span className="pill" style={{ fontSize: 'clamp(14px, 2.2vh, 20px)' }}>
-              <Star size={15} /> {score}
-            </span>
-          </div>
-
-          <div
-            key={at}
-            className="pop"
-            style={{
-              display: 'grid',
-              placeItems: 'center',
-              width: 'min(880px, 100%)',
-              borderRadius: 'var(--r-lg)',
-              background:
-                flash === 'ok' ? 'rgba(63,191,90,.2)' : flash === 'no' ? 'rgba(244,68,46,.2)' : 'rgba(255,255,255,.05)',
-              transition: 'background .15s',
-              padding: 'calc(var(--u)*.8)',
-            }}
-          >
-            <WordArt word={current.word} size="min(200px, 24vh)" float={false} />
-          </div>
-
-          <div className="opts opts--2">
-            {current.options.map((o) => (
-              <button key={o} className="opt" style={{ justifyContent: 'center' }} onClick={() => answer(o)}>
-                {o}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {phase === 'over' && (
-        <div className="center">
-          <div className="eyebrow">Time!</div>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(52px, 16vh, 130px)', lineHeight: 1 }}>
-            {score}
-          </div>
-          <p className="hint">
-            correct in 60 seconds{misses > 0 && ` · ${misses} misses`}
-          </p>
-          {score >= (p?.best ?? 0) && score > 0 && (
-            <p style={{ color: 'var(--yellow)', fontFamily: 'var(--font-display)', fontSize: 'clamp(16px,2.6vh,24px)' }}>
-              ⭐ New record for {p?.callsign}!
-            </p>
-          )}
-          <div className="btn-row" style={{ justifyContent: 'center' }}>
-            <button className="btn" onClick={start}>
-              Beat it — run again
-            </button>
-            {state.pilots.length > 1 && (
-              <button
-                className="btn btn--ghost"
-                onClick={tap(() => {
-                  passTurn();
-                  setPhase('ready');
-                })}
-              >
-                Next pilot →
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-    </Stage>
-  );
+  // The last answer must be committed before recording the completed round.
+  useEffect(()=>{if(phase==='run' && given && at===queue.length-1 && timed)stop();});
+  const answer=(o:string)=>{if(given||phase!=='run'||settled.current||busy.current)return;busy.current=true;setGiven(o);if(o===word.word){setScore(s=>s+1);sfx.right();}else{flagWord(word.id);sfx.tap();}};
+  return <Stage title="Word boost · optional" step={phase==='run'?`${at+1} / 10`:'Choose your pace'} hint="Ten pictures. Say the word too. A timer is optional; it never measures your English level."
+    footer={phase!=='run'?<NextButton label="Play Galaxy Run" />:<button className="btn" disabled={!given} onClick={()=>{if(at===9)stop();else{setAt(at+1);setGiven('');busy.current=false;}}}>Continue →</button>}>
+    {phase==='ready'?<div className="center"><h2 className="q">A little word boost?</h2><p>Relaxed practice gives you time to think and read feedback.</p><div className="btn-row"><button className={`btn ${!timed?'':'btn--ghost'}`} onClick={()=>setTimed(false)}>🌱 No timer</button><button className={`btn ${timed?'':'btn--ghost'}`} onClick={()=>setTimed(true)}>⚡ 60-second challenge</button></div><button className="btn btn--lg" onClick={start}>Start 10 pictures</button></div>
+    :phase==='over'?<div className="center"><h2 className="q">{score} / 10 words</h2><p>{timed?'Timed challenge finished.':'Relaxed practice finished.'} Every attempt helps you remember.</p><div className="btn-row"><button className="btn" onClick={start}>Try again</button><button className="btn btn--ghost" onClick={()=>{passTurn();setPhase('ready');}}>Choose pace / next pilot</button></div></div>
+    :<div className="center"><div className="row">{timed?<CountdownRing seconds={60} running runKey={run} onDone={stop} size={75}/>:<span className="pill">🌱 Take your time</span>}<span>{score} correct</span></div><WordArt word={word} size="min(210px,24vh)" float={false}/><div className="opts opts--2">{options.map(o=><button key={o} className="opt" disabled={!!given} onClick={()=>answer(o)}>{o}</button>)}</div>{given&&<Verdict ok={given===word.word} text={`${word.word} — ${word.definition}. Say it once, then continue.`}/>}</div>}
+  </Stage>;
 }

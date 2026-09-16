@@ -288,7 +288,7 @@ export function GalaxyRun() {
               {rolling ? 'Rolling…' : moving ? 'Flying…' : 'Roll'}
             </button>
           )}
-          <NextButton label="Skip ahead" />
+          <NextButton label="Create my planet" />
         </div>
       }
     >
@@ -382,11 +382,11 @@ export function GalaxyRun() {
             ))}
           <div className="tile-card" style={{ ['--accent' as string]: 'var(--yellow)' }}>
             <span className="card-label" style={{ ['--accent' as string]: 'var(--yellow)' }}>
-              The golden rule
+              The crew promise
             </span>
             <p style={{ margin: '4px 0 0' }}>
-              English only. Try, make mistakes, keep flying. A good answer is one star — first rocket to the NEW
-              SCHOOL wins the race, most stars wins the MVP badge.
+              Try English. Ask for help. Mistakes and Russian carry no penalty. A good answer is one star — first rocket to the NEW
+              SCHOOL wins the race, most stars wins the participation badge.
             </p>
           </div>
         </div>
@@ -438,7 +438,7 @@ function TaskModal({
         <>
           <MeteorTask
             card={task.card}
-            showRule={hard}
+            showRule
             onSolved={(clean) => {
               onRecord(clean, { skill: 'grammar', rule: task.card.rule });
               onSucceed(`fixed “${task.card.tokens[task.card.wrong[0]]}” → “${task.card.fix}”`);
@@ -449,10 +449,10 @@ function TaskModal({
               className="btn btn--ghost btn--sm"
               onClick={() => {
                 onRecord(false, { skill: 'grammar', rule: task.card.rule });
-                onFail('could not fix the meteor', 2);
+                onFail('will practise this meteor with help');
               }}
             >
-              Give up — go back 2
+              Ask for help / pass
             </button>
           </div>
         </>

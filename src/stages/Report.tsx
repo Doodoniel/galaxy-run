@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { CAN_DO } from '../data/bridge';
 import { WORDS } from '../data/content';
-import { accuracy, leaderboard, mvp, sharpest, SKILLS, useGame, type Pilot } from '../state/game';
+import { accuracy, leaderboard, SKILLS, useGame, type Pilot } from '../state/game';
 import { Stage } from '../components/Shell';
 import { Certificate } from '../components/Certificate';
 import { Planet } from '../components/Planet';
@@ -17,8 +18,8 @@ export function Report() {
   const [certs, setCerts] = useState(false);
 
   const board = leaderboard(state.pilots);
-  const best = mvp(state.pilots);
-  const sharp = sharpest(state.pilots);
+  const stars = state.pilots.reduce((sum, p) => sum + p.stars, 0);
+  const checkpoint = state.results.reboot;
   const winner = board.find((p) => p.place === 1);
   const record = Math.max(0, ...state.pilots.map((p) => p.best));
   const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -44,7 +45,7 @@ export function Report() {
           </button>
         </div>
       }
-      hint="“Pilots, count your stars. Mission 01 complete. Next time we fly to planet two.”"
+      hint="What can you say now? Tell a partner. Choose one thing to practise next."
     >
       <div
         style={{
@@ -66,16 +67,16 @@ export function Report() {
           />
           <Headline
             accent="var(--yellow)"
-            label="MVP · speaking"
-            big={best?.callsign ?? '—'}
-            sub={`${best?.stars ?? 0} stars`}
+            label="Crew energy"
+            big={`${stars} stars`}
+            sub="Participation and game rewards"
             icon="⭐"
           />
           <Headline
             accent="var(--green)"
-            label="Sharpest · accuracy"
-            big={sharp?.callsign ?? '—'}
-            sub={sharp ? `${accuracy(sharp).right}/${accuracy(sharp).total} right` : 'not enough answers yet'}
+            label="Memory checkpoint"
+            big={checkpoint ? `${checkpoint.right}/${checkpoint.total}` : 'Not completed'}
+            sub="Crew first answers · not a level test"
             icon="🎯"
           />
         </div>
@@ -109,8 +110,8 @@ export function Report() {
               Homework
             </span>
             <div className="hint" style={{ marginTop: 4 }}>
-              Record a 15-second voice message: the pitch of your planet. Then open <b>Memory Core</b> and push the
-              words on your certificate to level 5.
+              Write 3–5 sentences about your planet: a description, a past event and a plan.
+              Practise two tricky words in <b>Memory Core</b>.
             </div>
           </div>
         </div>
@@ -191,7 +192,7 @@ function PilotCard({ pilot }: { pilot: Pilot }) {
               {[missed.map((w) => w.word).join(', '), ...rules].filter(Boolean).join(' · ')}
             </>
           ) : acc.total > 0 ? (
-            <span style={{ color: 'var(--green)' }}>Nothing to fix — everything asked, everything right.</span>
+            <span style={{ color: 'var(--green)' }}>All answers recorded so far were correct. Try using the language in your own message.</span>
           ) : (
             'No questions answered yet.'
           )}
@@ -199,7 +200,12 @@ function PilotCard({ pilot }: { pilot: Pilot }) {
 
         <div className="hint">
           Planet <b style={{ color: 'var(--ink)' }}>{pilot.planet.name || '—'}</b>
-          {pilot.planet.pitched && ' · pitched ⭐'}
+          {pilot.planet.pitched && ' · shared ⭐'}
+          <details style={{marginTop:8}}><summary>My learning passport</summary>
+          {CAN_DO.map((c,i)=><p key={c}>{c}<br/><b>{['Not reflected yet','I need practice','With help','On my own'][pilot.planet.reflection?.[i]??0]}</b></p>)}
+          <p>Observed: {(pilot.planet.criteria??[]).filter(Boolean).length}/3 speaking criteria. Teacher feedback, not an automatic grade.</p>
+          {pilot.planet.notes && <p style={{whiteSpace:'pre-wrap'}}>My postcard: {pilot.planet.notes}</p>}
+          </details>
         </div>
       </div>
     </div>
